@@ -160,5 +160,5 @@ cython_debug/
 #.idea/
 
 # Directories
-code/models
-code/features_extraction
+models/
+feature_extraction/
