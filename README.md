@@ -30,6 +30,8 @@ python code/preprocessing/histoqc/generate_quality_file_list.py --database 'TCGA
 echo 'Finished HistoQC Quality File on TCGA-BRCA Database.'
 ```
 
+
+
 ### Patch (and Segmentation Mask) Creation using CLAM
 To obtain the patches of the good-quality WSIs, using the CLAM framework, you can run the following script:
 ```bash
@@ -45,7 +47,7 @@ python code/preprocessing/patch_and_segmentation/create_patches_fp.py --source_d
 echo 'Finished CLAM (create_patches_fp.py) on TCGA-BRCA Database.'
 ```
 
-On the other hand, you can also ignore the HistoQC results:
+On the other hand, you can also ignore the HistoQC results and run the following script:
 ```bash
 #!/bin/bash
 
@@ -57,4 +59,37 @@ python code/preprocessing/patch_and_segmentation/create_patches_fp.py --source_d
 python code/preprocessing/patch_and_segmentation/create_patches_fp.py --source_dir 'data/TCGA-BRCA' --dataset_name 'TCGA-BRCA' --tcgabrca_expstr 'TissueSlide' --save_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationCLAM' --patch_size 256 --preset 'code/preprocessing/patch_and_segmentation/presets/tcga.csv' --seg --save_mask --patch --stitch --verbose
 
 echo 'Finished CLAM (create_patches_fp.py) on TCGA-BRCA Database.'
+```
+
+
+
+### Feature Extraction 
+#### Using CLAM
+To perform feature extraction using CLAM, you can run the following script:
+```bash
+#!/bin/bash
+
+echo 'Started CLAM (extract_features_clam.py) on TCGA-BRCA Database.'
+
+python code/feature_extraction/extract_features_clam.py --gpu_id 0 --data_h5_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC' --process_list_csv_path 'results/CLAM/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/process_list_autogen.csv' --feat_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/clam' --batch_size 512 --num_workers 10 --pin_memory --verbose
+
+python code/feature_extraction/extract_features_clam.py --gpu_id 0 --data_h5_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC' --process_list_csv_path 'results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/process_list_autogen.csv' --feat_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/clam' --batch_size 512 --num_workers 10 --pin_memory --verbose
+
+echo 'Finished CLAM (extract_features_fp.py) on TCGA-BRCA Database.'
+
+```
+
+#### Using PLIP
+To perform feature extraction using PLIP, you can run the following script:
+```bash
+#!/bin/bash
+
+echo 'Started feature extraction using PLIP on TCGA-BRCA Database.'
+
+python code/feature_extraction/extract_features_plip.py --gpu_id 0 --data_h5_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC' --process_list_csv_path 'results/CLAM/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/process_list_autogen.csv' --feat_dir 'results/PLIP/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/plip' --batch_size 4096 --num_workers 12 --pin_memory --verbose
+
+python code/feature_extraction/extract_features_plip.py --gpu_id 0 --data_h5_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC' --process_list_csv_path 'results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/process_list_autogen.csv' --feat_dir 'results/PLIP/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/plip' --batch_size 4096 --num_workers 12 --pin_memory --verbose
+
+echo 'Finished feature extraction using PLIP on TCGA-BRCA Database.'
+
 ```
