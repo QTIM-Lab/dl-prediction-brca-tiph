@@ -6,7 +6,8 @@ Implementation of the paper "Deep Learning-based Prediction of Breast Cancer Tum
 # Data Preparation
 ## Preprocessing
 ### HistoQC Analysis
-You can start by running the HistoQC package to obtain a list of the good-quality WSIs. 
+We start by running the HistoQC package to obtain a list of the good-quality WSIs. 
+
 To run the HistoQC package on the data, you can run the following script:
 ```bash
 #!/bin/bash
@@ -33,6 +34,8 @@ echo 'Finished HistoQC Quality File on TCGA-BRCA Database.'
 
 
 ### Patch (and Segmentation Mask) Creation using CLAM
+Then, we obtain the patches (and segmentation masks) from the WSIs.
+
 To obtain the patches of the good-quality WSIs, using the CLAM framework, you can run the following script:
 ```bash
 #!/bin/bash
@@ -63,7 +66,9 @@ echo 'Finished CLAM (create_patches_fp.py) on TCGA-BRCA Database.'
 
 
 
-### Feature Extraction 
+### Feature Extraction
+Next, we can proceed into feature extraction.
+
 #### Using CLAM
 To perform feature extraction using CLAM, you can run the following script:
 ```bash
@@ -96,6 +101,8 @@ echo 'Finished feature extraction using PLIP on TCGA-BRCA Database.'
 
 
 ### Model Training
+Finally, we can move forward to model training.
+
 #### Using CLAM framework
 To train the AM-SB/AM-MB models, you can run the following script:
 ```bash
@@ -171,4 +178,156 @@ do
 done
 
 echo 'Finished TransMIL (train_model_fp.py) on TCGA-BRCA Database.'
+```
+
+
+
+### Model Testing
+Afterward, we can move forward to model testing.
+
+#### Using CLAM framework
+To test the AM-SB/AM-MB models, you can run the following script:
+```bash
+#!/bin/bash
+
+echo 'Started CLAM (test_model_fp.py) on TCGA-BRCA Database.'
+
+# List of checkpoint directories for AM_SB (CLAM/ResNet50 Features)
+CHECKPOINT_DIRS=('results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_angiogenesis/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_epithelial_mesenchymal_transition/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_fatty_acid_metabolism/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_oxidative_phosphorylation/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_glycolysis/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/kegg_antigen_processing_and_presentation/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/gobp_t_cell_mediated_cytotoxicity/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/gobp_b_cell_proliferation/YYYY-MM-DD_hh-mm-ss'\ 
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/kegg_cell_cycle/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/immunosuppression/YYYY-MM-DD_hh-mm-ss')
+
+ for checkpoint_dir in "${CHECKPOINT_DIRS[@]}"
+do
+    echo "Started CLAM (test_model_fp.py) for checkpoint: $checkpoint_dir"
+    
+    # CLAM/ResNet50 Features
+    python code/models/clam/test_model_fp.py --gpu_id 0 --checkpoint_dir $checkpoint_dir --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --setting 'binary' --features_pt_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/clam/pt_files' 'results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/clam/pt_files'
+
+    echo "Finished CLAM (test_model_fp.py) for checkpoint: $checkpoint_dir"
+done
+
+
+
+# List of checkpoint directories for AM-MB (CLAM/ResNet50 Features)
+CHECKPOINT_DIRS=('results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/gobp_b_cell_proliferation/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/gobp_t_cell_mediated_cytotoxicity/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_angiogenesis/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_epithelial_mesenchymal_transition/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_fatty_acid_metabolism/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_glycolysis/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_oxidative_phosphorylation/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/immunosuppression/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/kegg_antigen_processing_and_presentation/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/kegg_cell_cycle/YYYY-MM-DD_hh-mm-ss')
+
+ for checkpoint_dir in "${CHECKPOINT_DIRS[@]}"
+do
+    echo "Started CLAM (test_model_fp.py) for checkpoint: $checkpoint_dir"
+    
+    # CLAM/ResNet50 Features
+    python code/models/clam/test_model_fp.py --gpu_id 0 --checkpoint_dir $checkpoint_dir --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --setting 'binary' --features_pt_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/clam/pt_files' 'results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/clam/pt_files'
+
+    echo "Finished CLAM (test_model_fp.py) for checkpoint: $checkpoint_dir"
+done
+
+
+
+# List of checkpoint directories for AM-SB and AM-MB (PLIP Features)
+ CHECKPOINT_DIRS=('results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/gobp_b_cell_proliferation/YYYY-MM-DD_hh-mm-ss' \
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/gobp_b_cell_proliferation/YYYY-MM-DD_hh-mm-ss' \
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/gobp_t_cell_mediated_cytotoxicity/YYYY-MM-DD_hh-mm-ss' \
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/gobp_t_cell_mediated_cytotoxicity/YYYY-MM-DD_hh-mm-ss' \
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_angiogenesis/YYYY-MM-DD_hh-mm-ss' \
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_angiogenesis/YYYY-MM-DD_hh-mm-ss' \
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_epithelial_mesenchymal_transition/YYYY-MM-DD_hh-mm-ss' \
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_epithelial_mesenchymal_transition/YYYY-MM-DD_hh-mm-ss' \
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_fatty_acid_metabolism/YYYY-MM-DD_hh-mm-ss' \
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_fatty_acid_metabolism/YYYY-MM-DD_hh-mm-ss' \
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_glycolysis/YYYY-MM-DD_hh-mm-ss' \
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_glycolysis/YYYY-MM-DD_hh-mm-ss' \
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_oxidative_phosphorylation/YYYY-MM-DD_hh-mm-ss' \
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_oxidative_phosphorylation/YYYY-MM-DD_hh-mm-ss' \
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/immunosuppression/YYYY-MM-DD_hh-mm-ss' \
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/immunosuppression/YYYY-MM-DD_hh-mm-ss' \
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/kegg_antigen_processing_and_presentation/YYYY-MM-DD_hh-mm-ss' \
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/kegg_antigen_processing_and_presentation/YYYY-MM-DD_hh-mm-ss' \
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/kegg_cell_cycle/YYYY-MM-DD_hh-mm-ss' \
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/kegg_cell_cycle/YYYY-MM-DD_hh-mm-ss')
+
+
+for checkpoint_dir in "${CHECKPOINT_DIRS[@]}"
+do
+    echo "Started CLAM (test_model_fp.py) for checkpoint: $checkpoint_dir"
+    
+    # PLIP Features
+    python code/models/clam/test_model_fp.py --gpu_id 0 --checkpoint_dir $checkpoint_dir --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --setting 'binary' --features_pt_dir 'results/PLIP/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/plip/pt_files' 'results/PLIP/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/plip/pt_files'
+
+    echo "Finished CLAM (test_model_fp.py) for checkpoint: $checkpoint_dir"
+done
+
+echo 'Finished CLAM (test_model_fp.py) on TCGA-BRCA Database.'
+```
+
+#### Using TransMIL
+To test the TransMIL models, you can run the following script:
+```bash
+#!/bin/bash
+
+echo 'Started TransMIL (train_test_model_fp.py) on TCGA-BRCA Database.'
+
+# List of checkpoint directories for this project (CLAM/ResNet50-based features)
+CHECKPOINT_DIRS=('results/TransMIL/TCGA-BRCA/mmxbrcp/All/checkpoints/gobp_b_cell_proliferation/YYYY-MM-DD_hh-mm-ss'\
+ 'results/TransMIL/TCGA-BRCA/mmxbrcp/All/checkpoints/gobp_t_cell_mediated_cytotoxicity/YYYY-MM-DD_hh-mm-ss'\
+ 'results/TransMIL/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_angiogenesis/YYYY-MM-DD_hh-mm-ss'\
+ 'results/TransMIL/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_epithelial_mesenchymal_transition/YYYY-MM-DD_hh-mm-ss'\
+ 'results/TransMIL/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_fatty_acid_metabolism/YYYY-MM-DD_hh-mm-ss'\
+ 'results/TransMIL/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_glycolysis/YYYY-MM-DD_hh-mm-ss'\
+ 'results/TransMIL/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_oxidative_phosphorylation/YYYY-MM-DD_hh-mm-ss'\
+ 'results/TransMIL/TCGA-BRCA/mmxbrcp/All/checkpoints/immunosuppression/YYYY-MM-DD_hh-mm-ss'\
+ 'results/TransMIL/TCGA-BRCA/mmxbrcp/All/checkpoints/kegg_antigen_processing_and_presentation/YYYY-MM-DD_hh-mm-ss'\
+ 'results/TransMIL/TCGA-BRCA/mmxbrcp/All/checkpoints/kegg_cell_cycle/YYYY-MM-DD_hh-mm-ss')
+
+for checkpoint_dir in "${CHECKPOINT_DIRS[@]}"
+do
+    echo "Started TransMIL (train_test_model_fp.py) for checkpoint directory: $checkpoint_dir"
+    
+    # CLAM/ResNet50-based features
+    python code/models/transmil/train_test_model_fp.py --gpu_id 0 --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --setting 'binary' --features_pt_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/clam/pt_files' 'results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/clam/pt_files' --checkpoint_dir $checkpoint_dir --train_or_test 'test'
+    
+    echo "Finished TransMIL (train_test_model_fp.py) for checkpoint directory: $checkpoint_dir"
+done
+
+
+
+ # List of checkpoint directories for this project (PLIP-based features)
+CHECKPOINT_DIRS=('results/TransMIL/TCGA-BRCA/mmxbrcp/All/checkpoints/gobp_b_cell_proliferation/YYYY-MM-DD_hh-mm-ss'\
+ 'results/TransMIL/TCGA-BRCA/mmxbrcp/All/checkpoints/gobp_t_cell_mediated_cytotoxicity/YYYY-MM-DD_hh-mm-ss'\
+ 'results/TransMIL/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_angiogenesis/YYYY-MM-DD_hh-mm-ss'\
+ 'results/TransMIL/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_epithelial_mesenchymal_transition/YYYY-MM-DD_hh-mm-ss'\
+ 'results/TransMIL/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_fatty_acid_metabolism/YYYY-MM-DD_hh-mm-ss'\
+ 'results/TransMIL/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_glycolysis/YYYY-MM-DD_hh-mm-ss'\
+ 'results/TransMIL/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_oxidative_phosphorylation/YYYY-MM-DD_hh-mm-ss'\
+ 'results/TransMIL/TCGA-BRCA/mmxbrcp/All/checkpoints/immunosuppression/YYYY-MM-DD_hh-mm-ss'\
+ 'results/TransMIL/TCGA-BRCA/mmxbrcp/All/checkpoints/kegg_antigen_processing_and_presentation/YYYY-MM-DD_hh-mm-ss'\
+ 'results/TransMIL/TCGA-BRCA/mmxbrcp/All/checkpoints/kegg_cell_cycle/YYYY-MM-DD_hh-mm-ss')
+
+for checkpoint_dir in "${CHECKPOINT_DIRS[@]}"
+do
+    echo "Started TransMIL (train_test_model_fp.py) for checkpoint directory: $checkpoint_dir"
+
+    # PLIP-based features
+    python code/models/transmil/train_test_model_fp.py --gpu_id 0 --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --setting 'binary' --features_pt_dir 'results/PLIP/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/plip/pt_files' 'results/PLIP/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/plip/pt_files' --checkpoint_dir $checkpoint_dir --train_or_test 'test'
+    
+    echo "Finished TransMIL (train_test_model_fp.py) for checkpoint directory: $checkpoint_dir"
+done
+
+echo 'Finished TransMIL (train_test_model_fp.py) on TCGA-BRCA Database.'
 ```
