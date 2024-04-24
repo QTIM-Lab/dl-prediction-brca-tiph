@@ -331,3 +331,81 @@ done
 
 echo 'Finished TransMIL (train_test_model_fp.py) on TCGA-BRCA Database.'
 ```
+
+
+
+### Heatmap Generation
+After training the models, we can proceed to the heatmap generation, to understand their behavior.
+
+#### Using CLAM/ResNet50 features
+To generate heatmaps for the CLAM/ResNet50 features, you can run the following script:
+```bash
+#!/bin/bash
+
+echo 'Started CLAM (create_heatmaps_fp.py) on TCGA-BRCA Database.'
+
+# List of checkpoint directories for AM-SB and AM-MB (CLAM/ResNet50 Features)
+CHECKPOINT_DIRS=('results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_angiogenesis/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_epithelial_mesenchymal_transition/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_fatty_acid_metabolism/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_oxidative_phosphorylation/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_glycolysis/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/kegg_antigen_processing_and_presentation/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/gobp_t_cell_mediated_cytotoxicity/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/gobp_b_cell_proliferation/YYYY-MM-DD_hh-mm-ss'\ 
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/kegg_cell_cycle/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/immunosuppression/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/gobp_b_cell_proliferation/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/gobp_t_cell_mediated_cytotoxicity/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_angiogenesis/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_epithelial_mesenchymal_transition/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_fatty_acid_metabolism/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_glycolysis/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_oxidative_phosphorylation/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/immunosuppression/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/kegg_antigen_processing_and_presentation/YYYY-MM-DD_hh-mm-ss'\
+ 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/kegg_cell_cycle/YYYY-MM-DD_hh-mm-ss')
+
+
+
+# List of checkpoint directories for TinyCLAM_SB and TinyCLAM_MB (PLIP Features)
+# CHECKPOINT_DIRS=('/autofs/cluster/qtim/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/gobp_b_cell_proliferation/2023-11-21_23-50-42' \
+#  '/autofs/cluster/qtim/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/gobp_b_cell_proliferation/2023-11-22_00-36-58' \
+#  '/autofs/cluster/qtim/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/gobp_t_cell_mediated_cytotoxicity/2023-11-21_22-12-20' \
+#  '/autofs/cluster/qtim/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/gobp_t_cell_mediated_cytotoxicity/2023-11-21_22-58-42' \
+#  '/autofs/cluster/qtim/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_angiogenesis/2023-11-21_11-19-00' \
+#  '/autofs/cluster/qtim/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_angiogenesis/2023-11-21_12-07-08' \
+#  '/autofs/cluster/qtim/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_epithelial_mesenchymal_transition/2023-11-21_12-58-26' \
+#  '/autofs/cluster/qtim/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_epithelial_mesenchymal_transition/2023-11-21_13-44-32' \
+#  '/autofs/cluster/qtim/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_fatty_acid_metabolism/2023-11-21_15-40-43' \
+#  '/autofs/cluster/qtim/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_fatty_acid_metabolism/2023-11-21_16-26-51' \
+#  '/autofs/cluster/qtim/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_glycolysis/2023-11-21_18-56-08' \
+#  '/autofs/cluster/qtim/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_glycolysis/2023-11-21_19-42-32' \
+#  '/autofs/cluster/qtim/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_oxidative_phosphorylation/2023-11-21_17-18-13' \
+#  '/autofs/cluster/qtim/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_oxidative_phosphorylation/2023-11-21_18-04-17' \
+#  '/autofs/cluster/qtim/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/immunosuppression/2023-11-22_03-06-00' \
+#  '/autofs/cluster/qtim/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/immunosuppression/2023-11-22_03-52-09' \
+#  '/autofs/cluster/qtim/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/kegg_antigen_processing_and_presentation/2023-11-21_20-34-04' \
+#  '/autofs/cluster/qtim/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/kegg_antigen_processing_and_presentation/2023-11-21_21-20-38' \
+#  '/autofs/cluster/qtim/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/kegg_cell_cycle/2023-11-22_01-28-29' \
+#  '/autofs/cluster/qtim/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/kegg_cell_cycle/2023-11-22_02-14-34')
+
+
+
+for checkpoint_dir in "${CHECKPOINT_DIRS[@]}"
+do
+    echo "Started CLAM (create_heatmaps_fp.py) for checkpoint: $checkpoint_dir"
+    
+    # CLAM Features
+    python code/clam/create_heatmaps_fp.py --gpu_id 0 --checkpoint_dir $checkpoint_dir --dataset 'TCGA-BRCA' --base_data_path '/autofs/cluster/qtim/datasets/public/TCGA-BRCA' --experimental_strategy 'All' --setting 'binary' --features_pt_dir '/autofs/cluster/qtim/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/clam/pt_files' '/autofs/cluster/qtim/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/clam/pt_files' --generate_heatmaps_for 'test' --heatmap_config_file 'code/clam/config/tcgabrca_clam_fts_tinyclam_sb_heatmap_config.json' --use_histoqc_quality_file '/autofs/cluster/qtim/projects/breast-cancer-pathology/results/HistoQC/TCGA-BRCA/mmxbrcp/hqc_quality_file.csv' --use_histoqc_seg_masks --verbose
+    
+    # PLIP Features
+    # python code/clam/create_heatmaps_fp.py --gpu_id 2 --checkpoint_dir $checkpoint_dir --dataset 'TCGA-BRCA' --base_data_path '/autofs/cluster/qtim/datasets/public/TCGA-BRCA' --experimental_strategy 'All' --setting 'binary' --features_pt_dir '/autofs/cluster/qtim/projects/breast-cancer-pathology/results/PLIP/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/plip/pt_files' '/autofs/cluster/qtim/projects/breast-cancer-pathology/results/PLIP/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/plip/pt_files'
+
+    echo "Finished CLAM (create_heatmaps_fp.py) for checkpoint: $checkpoint_dir"
+done
+
+echo 'Finished CLAM (create_heatmaps_fp.py) on TCGA-BRCA Database.'
+```
+
+#### Using PLIP features
