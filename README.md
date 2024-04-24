@@ -91,5 +91,84 @@ python code/feature_extraction/extract_features_plip.py --gpu_id 0 --data_h5_dir
 python code/feature_extraction/extract_features_plip.py --gpu_id 0 --data_h5_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC' --process_list_csv_path 'results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/process_list_autogen.csv' --feat_dir 'results/PLIP/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/plip' --batch_size 4096 --num_workers 12 --pin_memory --verbose
 
 echo 'Finished feature extraction using PLIP on TCGA-BRCA Database.'
+```
 
+
+
+### Model Training
+#### Using CLAM framework
+To train the AM-SB/AM-MB models, you can run the following script:
+```bash
+#!/bin/bash
+
+echo 'Started CLAM (train_model_fp.py) on TCGA-BRCA Database.'
+
+# List of labels for this project
+LABELS=('hallmark_angiogenesis'\
+ 'hallmark_epithelial_mesenchymal_transition'\
+ 'hallmark_fatty_acid_metabolism'\
+ 'hallmark_oxidative_phosphorylation'\
+ 'hallmark_glycolysis'\
+ 'kegg_antigen_processing_and_presentation'\
+ 'gobp_t_cell_mediated_cytotoxicity'\
+ 'gobp_b_cell_proliferation'\
+ 'kegg_cell_cycle'\
+ 'immunosuppression')
+
+
+for label in "${LABELS[@]}"
+do
+    echo "Started CLAM (train_model_fp.py) for label: $label"
+    
+    # CLAM (ResNet50) Features
+    python code/models/clam/train_val_model_fp.py --gpu_id 0 --results_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints' --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --setting 'binary' --features_pt_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/clam/pt_files' 'results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/clam/pt_files' --label $label --config_json 'code/models/clam/config/tcgabrca_clam_fts_am_sb_config.json'
+    
+    python code/models/clam/train_val_model_fp.py --gpu_id 0 --results_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints' --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --setting 'binary' --features_pt_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/clam/pt_files' 'results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/clam/pt_files' --label $label --config_json 'code/models/clam/config/tcgabrca_clam_fts_am_mb_config.json'
+    
+    # PLIP Features
+    python code/models/clam/train_val_model_fp.py --gpu_id 0 --results_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints' --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --setting 'binary' --features_pt_dir 'results/PLIP/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/plip/pt_files' 'results/PLIP/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/plip/pt_files' --label $label --config_json 'code/models/clam/config/tcgabrca_plip_fts_am_sb_config.json'
+    
+    python code/models/clam/train_val_model_fp.py --gpu_id 0 --results_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints' --dataset 'TCGA-BRCA' --base_data_path 'results/PLIP/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/plip/pt_files' 'results/PLIP/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/plip/pt_files' --label $label --config_json 'code/models/clam/config/tcgabrca_plip_fts_am_mb_config.json'
+
+    echo "Finished CLAM (train_model_fp.py) for label: $label"
+done
+
+echo 'Finished CLAM (train_model_fp.py) on TCGA-BRCA Database.'
+
+```
+
+#### Using TransMIL
+To train the TransMIL models, you can run the following script:
+```bash
+#!/bin/bash
+
+echo 'Started TransMIL (train_model_fp.py) on TCGA-BRCA Database.'
+
+# List of labels for this project
+LABELS=('hallmark_angiogenesis'\
+ 'hallmark_epithelial_mesenchymal_transition'\
+ 'hallmark_fatty_acid_metabolism'\
+ 'hallmark_oxidative_phosphorylation'\
+ 'hallmark_glycolysis'\
+ 'kegg_antigen_processing_and_presentation'\
+ 'gobp_t_cell_mediated_cytotoxicity'\
+ 'gobp_b_cell_proliferation'\
+ 'kegg_cell_cycle'\
+ 'immunosuppression')
+
+
+for label in "${LABELS[@]}"
+do
+    echo "Started TransMIL (train_model_fp.py) for label: $label"
+    
+    # CLAM (ResNet50) Features
+    python code/models/transmil/train_test_model_fp.py --gpu_id 0 --results_dir 'results/TransMIL/TCGA-BRCA/mmxbrcp/All/checkpoints' --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --setting 'binary' --features_pt_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/clam/pt_files' 'results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/clam/pt_files' --label $label --config_json 'code/models/transmil/config/tcgabrca_clam_fts_transmil_config.json' --train_or_test 'train'
+    
+    # PLIP Features
+    python code/models/transmil/train_test_model_fp.py --gpu_id 0 --results_dir 'results/TransMIL/TCGA-BRCA/mmxbrcp/All/checkpoints' --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --setting 'binary' --features_pt_dir 'results/PLIP/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/plip/pt_files' 'results/PLIP/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/plip/pt_files' --label $label --config_json 'code/models/transmil/config/tcgabrca_plip_fts_transmil_config.json' --train_or_test 'train'
+
+    echo "Finished TransMIL (train_model_fp.py) for label: $label"
+done
+
+echo 'Finished TransMIL (train_model_fp.py) on TCGA-BRCA Database.'
 ```
