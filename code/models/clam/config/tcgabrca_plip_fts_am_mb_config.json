@@ -1,0 +1,28 @@
+{
+    "data": {
+        "label_frac": 1.0,
+        "encoding_size": 512,
+        "n_folds": 1,
+        "n_classes":2,
+        "num_workers":4,
+        "pin_memory":true
+    },
+
+    "hyperparameters": {
+        "label_thresh_metric": "zero",
+        "epochs": 300,
+        "lr": 2e-4,
+        "weight_decay": 1e-5,
+        "early_stopping": false,
+        "optimizer": "Adam",
+        "dropout": true,
+        "dropout_prob": 0.25,
+        "loss": "CE",
+        "model_type": "am_mb",
+        "weighted_sample": false,
+        "model_size": "small"
+    },
+
+    "verbose": true,
+    "features": "plip"
+  }

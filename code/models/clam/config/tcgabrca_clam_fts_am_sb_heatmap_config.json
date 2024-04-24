@@ -1,0 +1,27 @@
+{
+    "data":{
+        "n_classes":2,
+        "batch_size":384,
+        "patch_size":256,
+        "step_size":256,
+        "overlap":0.5,
+        "patch_level":0,
+        "custom_downsample":1
+    },
+
+    "heatmap_arguments":{
+        "vis_level":1,
+        "alpha":0.4,
+        "blank_canvas":false,
+        "save_orig":true,
+        "use_ref_scores":true,
+        "blur":false,
+        "use_center_shift":true,
+        "calc_heatmap":true,
+        "binarize":false,
+        "binary_thresh":-1,
+        "custom_downsample":1,
+        "cmap":"jet",
+        "production_mode":false
+    }
+}
