@@ -160,5 +160,4 @@ cython_debug/
 #.idea/
 
 # Directories and OS generated files
-transmil/
 *.DS_Store

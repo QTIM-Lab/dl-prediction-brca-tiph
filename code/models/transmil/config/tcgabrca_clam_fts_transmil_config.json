@@ -1,0 +1,47 @@
+{
+    "general": {
+        "comment": "",
+        "fp16": true,
+        "amp_level": "O2",
+        "precision": 16,
+        "multi_gpu_mode": "dp",
+        "max_epochs": 200,
+        "grad_acc": 2,
+        "frozen_bn": false,
+        "early_stopping":false,
+        "patience": 10,
+        "verbose":true,
+        "encoding_size":1024,
+        "features":"clam"
+    },
+    
+    
+    "data": {
+        "dataset_name": "TCGA-BRCA",
+        "label_thresh_metric": "zero",
+        "n_folds": 1,
+        "batch_size": 1,
+        "num_workers": 4,
+        "pin_memory": true
+    },
+    
+    "model":{
+        "name": "TransMIL",
+        "n_classes": 2
+    },
+
+    "hyperparameters": {
+        "optimizer": {
+            "opt": "adam",
+            "lr": 0.0002,
+            "opt_eps": null,
+            "opt_betas": null,
+            "momentum": null,
+            "weight_decay": 0.00001
+        },
+
+        "loss": {
+            "base_loss": "CrossEntropyLoss"
+        }
+    }
+}
