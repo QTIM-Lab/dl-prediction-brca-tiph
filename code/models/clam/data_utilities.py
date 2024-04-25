@@ -103,7 +103,7 @@ class TCGABRCA_MIL_Dataset(Dataset):
 
         # Class variables
         self.transform = transform
-        print(len(self.train_dict)+len(self.val_dict)+len(self.test_dict))
+        print(len(self.train_dict[self.curr_fold]['case_id'])+len(self.val_dict[self.curr_fold]['case_id'])+len(self.test_dict[self.curr_fold]['case_id']))
 
         exit()
 
