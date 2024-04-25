@@ -106,7 +106,7 @@ class TCGABRCA_MIL_Dataset(Dataset):
         self.transform = transform
 
         exit()
-        
+
         return
 
 
@@ -296,7 +296,7 @@ class TCGABRCA_MIL_Dataset(Dataset):
                     fpt_fpath = os.path.join(f_dir, folder, fpt_fname)
                     if os.path.exists(fpt_fpath):
                         self.dataset_dict['features_pt'][idx] = fpt_fpath
-        print(len(self.dataset_dict['features_pt'][idx]))
+        print(len(self.dataset_dict['features_pt']))
         
         return
 
