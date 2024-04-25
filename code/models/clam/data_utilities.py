@@ -94,6 +94,7 @@ class TCGABRCA_MIL_Dataset(Dataset):
         # Build dataset
         self.dataset_dict, self.wsi_genex_label_dict, self.features_pt_dict = self.build_dataset_dicts()
         self.update_features_pt_paths()
+        
 
         # Apply train-val-test split according to the Case IDs
         self.train_dict, self.val_dict, self.test_dict = self.split_dataset()
@@ -104,6 +105,8 @@ class TCGABRCA_MIL_Dataset(Dataset):
         # Class variables
         self.transform = transform
 
+        exit()
+        
         return
 
 
@@ -170,6 +173,7 @@ class TCGABRCA_MIL_Dataset(Dataset):
                 folder_files = [f for f in os.listdir(os.path.join(f_dir, folder)) if not f.startswith('.')]
                 if 'original.h5' in folder_files:
                     features_pt_files += ['original.h5']
+        print(len(features_pt_files))
 
         return features_pt_files
 
@@ -286,11 +290,14 @@ class TCGABRCA_MIL_Dataset(Dataset):
 
         # Get all the features .PT files
         for idx, fpt_fname in enumerate(self.dataset_dict['features_pt']):
-            for fpt_dir in self.features_pt_dir:
-                fpt_fpath = os.path.join(fpt_dir, fpt_fname)
-                if os.path.exists(fpt_fpath):
-                    self.dataset_dict['features_pt'][idx] = fpt_fpath
-
+            for f_dir in self.features_pt_dir:
+                f_dir_folders = [f for f in os.listdir(f_dir) if os.path.isdir(os.path.join(f_dir, f))]            
+                for folder in f_dir_folders:
+                    fpt_fpath = os.path.join(f_dir, folder, fpt_fname)
+                    if os.path.exists(fpt_fpath):
+                        self.dataset_dict['features_pt'][idx] = fpt_fpath
+        print(len(self.dataset_dict['features_pt'][idx]))
+        
         return
 
 
