@@ -245,7 +245,7 @@ class TCGABRCA_MIL_Dataset(Dataset):
         for f in self.features:
             print(f)
             print(f.split('/')[-2])
-            case_id = self.get_case_id(wsi_path_or_name=f)
+            case_id = self.get_case_id(wsi_path_or_name=f.split('/')[-2])
             print(case_id)
             exit()
             if case_id not in features_h5_dict.keys():
