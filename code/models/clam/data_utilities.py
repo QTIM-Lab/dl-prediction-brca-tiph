@@ -237,8 +237,6 @@ class TCGABRCA_MIL_Dataset(Dataset):
                 if case_id not in wsi_genex_label_dict.keys():
                     wsi_genex_label_dict[case_id] = list()
                 wsi_genex_label_dict[case_id].append(w)
-                print(wsi_genex_label_dict)
-                exit()
 
 
         # Process the features names and obtain a dictionary that maps Case ID to filename
@@ -253,6 +251,9 @@ class TCGABRCA_MIL_Dataset(Dataset):
 
         # Process the WSIs
         for case_id in self.svs_fpaths_dict.keys():
+
+            print(case_id)
+            exit()
             
             # Check if this Case ID is part of our annotations and features
             if case_id in wsi_genex_label_dict.keys() and case_id in features_h5_dict.keys():
