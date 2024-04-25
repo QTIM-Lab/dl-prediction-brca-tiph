@@ -270,7 +270,6 @@ class TCGABRCA_MIL_Dataset(Dataset):
                             print(wsi_fname)
                             print(feature_h5_fname)
                             exit()
-                    feature_pt_fname = feature_pt_fname[0:-4] + '.pt'
 
                     # Get the SSGEA scores
                     ssgea_scores_list = wsi_genex_label_dict[case_id]
