@@ -78,7 +78,7 @@ class TCGABRCA_MIL_Dataset(Dataset):
         self.svs_fpaths_dict = self.get_svs_fpaths_dict()
 
         # Get the .pt files with feature
-        self.features = self.get_features_pt()
+        self.features = self.get_features_h5()
 
         # Get the ssGSEA Scores
         self.ssgsea_scores_dict = self.load_tcga_brca_ssgsea_scores()
@@ -93,6 +93,8 @@ class TCGABRCA_MIL_Dataset(Dataset):
 
         # Build dataset
         self.dataset_dict, self.wsi_genex_label_dict, self.features_pt_dict = self.build_dataset_dicts()
+        exit()
+
         self.update_features_pt_paths()
         
 
@@ -163,19 +165,19 @@ class TCGABRCA_MIL_Dataset(Dataset):
 
 
     # Method: Get the list of .pt files in the features directory
-    def get_features_pt(self):
+    def get_features_h5(self):
 
-        features_pt_files = list()
+        features_h5_files = list()
 
         for f_dir in self.features_pt_dir:
             f_dir_folders = [f for f in os.listdir(f_dir) if os.path.isdir(os.path.join(f_dir, f))]            
             for folder in f_dir_folders:
                 folder_files = [f for f in os.listdir(os.path.join(f_dir, folder)) if not f.startswith('.')]
                 if 'original.h5' in folder_files:
-                    features_pt_files += ['original.h5']
-        print(len(features_pt_files))
+                    features_h5_files.append(os.path.join(f_dir, folder, 'original.h5'))
+        print(len(features_h5_files))
 
-        return features_pt_files
+        return features_h5_files
 
 
     # Method: Load TCGA_BRCA_ssGSEA_Scores
@@ -221,7 +223,7 @@ class TCGABRCA_MIL_Dataset(Dataset):
         dataset_dict = {
             'case_id':list(),
             'svs_fpath':list(),
-            'features_pt':list(),
+            'features_h5':list(),
             'ssgea_id':list(),
             'ssgsea_scores':list()
         }
@@ -238,12 +240,12 @@ class TCGABRCA_MIL_Dataset(Dataset):
 
 
         # Process the features names and obtain a dictionary that maps Case ID to filename
-        features_pt_dict = dict()
+        features_h5_dict = dict()
         for f in self.features:
             case_id = self.get_case_id(wsi_path_or_name=f)
-            if case_id not in features_pt_dict.keys():
-                features_pt_dict[case_id] = list()
-            features_pt_dict[case_id].append(f)
+            if case_id not in features_h5_dict.keys():
+                features_h5_dict[case_id] = list()
+            features_h5_dict[case_id].append(f)
 
 
 
@@ -251,7 +253,7 @@ class TCGABRCA_MIL_Dataset(Dataset):
         for case_id in self.svs_fpaths_dict.keys():
             
             # Check if this Case ID is part of our annotations and features
-            if case_id in wsi_genex_label_dict.keys() and case_id in features_pt_dict.keys():
+            if case_id in wsi_genex_label_dict.keys() and case_id in features_h5_dict.keys():
 
                 # Open all the paths in this case id
                 for svs_path in self.svs_fpaths_dict[case_id]:
