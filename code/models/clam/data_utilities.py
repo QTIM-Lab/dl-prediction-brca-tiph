@@ -243,6 +243,7 @@ class TCGABRCA_MIL_Dataset(Dataset):
         features_h5_dict = dict()
         # print(self.features)
         for f in self.features:
+            print(f)
             case_id = self.get_case_id(wsi_path_or_name=f)
             print(case_id)
             exit()
