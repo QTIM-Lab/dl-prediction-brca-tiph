@@ -237,18 +237,17 @@ class TCGABRCA_MIL_Dataset(Dataset):
                 if case_id not in wsi_genex_label_dict.keys():
                     wsi_genex_label_dict[case_id] = list()
                 wsi_genex_label_dict[case_id].append(w)
+                print(wsi_genex_label_dict)
+                exit()
 
 
         # Process the features names and obtain a dictionary that maps Case ID to filename
         features_h5_dict = dict()
-        # print(self.features)
         for f in self.features:
             case_id = self.get_case_id(wsi_path_or_name=f.split('/')[-2])
             if case_id not in features_h5_dict.keys():
                 features_h5_dict[case_id] = list()
             features_h5_dict[case_id].append(f)
-            print(features_h5_dict)
-            exit()
 
 
 
