@@ -241,6 +241,8 @@ class TCGABRCA_MIL_Dataset(Dataset):
 
         # Process the features names and obtain a dictionary that maps Case ID to filename
         features_h5_dict = dict()
+        print(self.features)
+        exit()
         for f in self.features:
             case_id = self.get_case_id(wsi_path_or_name=f)
             if case_id not in features_h5_dict.keys():
@@ -282,11 +284,11 @@ class TCGABRCA_MIL_Dataset(Dataset):
 
         # Ensure quality of the database
         assert len(dataset_dict['case_id']) == len(dataset_dict['svs_fpath'])
-        assert len(dataset_dict['case_id']) == len(dataset_dict['features_pt'])
+        assert len(dataset_dict['case_id']) == len(dataset_dict['features_h5'])
         assert len(dataset_dict['case_id']) == len(dataset_dict['ssgea_id'])
         assert len(dataset_dict['case_id']) == len(dataset_dict['ssgsea_scores'])
 
-        return dataset_dict, wsi_genex_label_dict, features_pt_dict
+        return dataset_dict, wsi_genex_label_dict, features_h5_dict
 
 
     # Method: Update paths of the features .PT files
