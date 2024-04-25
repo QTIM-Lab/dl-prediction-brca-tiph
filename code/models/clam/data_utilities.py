@@ -15,10 +15,10 @@ from sklearn.model_selection import GroupShuffleSplit
 
 # Class: TCGABRCA_MIL_Dataset
 class TCGABRCA_MIL_Dataset(Dataset):
-    def __init__(self, base_data_path='TCGA-BRCA', experimental_strategy='All', label=None, features_pt_dir=None, train_size=0.70, val_size=0.15, test_size=0.15, n_folds=10, seed=42, transform=None):
+    def __init__(self, base_data_path='TCGA-BRCA', experimental_strategy='All', label=None, features_h5_dir=None, train_size=0.70, val_size=0.15, test_size=0.15, n_folds=10, seed=42, transform=None):
         
         assert experimental_strategy in ('All', 'DiagnosticSlide', 'TissueSlide')
-        assert features_pt_dir is not None
+        assert features_h5_dir is not None
         assert label in (
             'hallmark_angiogenesis',
             'hallmark_epithelial_mesenchymal_transition',
@@ -38,7 +38,7 @@ class TCGABRCA_MIL_Dataset(Dataset):
         # Class variables
         self.base_data_path = base_data_path
         self.experimental_strategy = experimental_strategy
-        self.features_pt_dir = features_pt_dir
+        self.features_h5_dir = features_h5_dir
         self.label = label
         self.train_size = train_size
         self.val_size = val_size
@@ -92,11 +92,8 @@ class TCGABRCA_MIL_Dataset(Dataset):
 
 
         # Build dataset
-        self.dataset_dict, self.wsi_genex_label_dict, self.features_pt_dict = self.build_dataset_dicts()
-        exit()
+        self.dataset_dict, self.wsi_genex_label_dict, self.features_h5_dict = self.build_dataset_dicts()
 
-        self.update_features_pt_paths()
-        
 
         # Apply train-val-test split according to the Case IDs
         self.train_dict, self.val_dict, self.test_dict = self.split_dataset()
@@ -169,7 +166,7 @@ class TCGABRCA_MIL_Dataset(Dataset):
 
         features_h5_files = list()
 
-        for f_dir in self.features_pt_dir:
+        for f_dir in self.features_h5_dir:
             f_dir_folders = [f for f in os.listdir(f_dir) if os.path.isdir(os.path.join(f_dir, f))]            
             for folder in f_dir_folders:
                 folder_files = [f for f in os.listdir(os.path.join(f_dir, folder)) if not f.startswith('.')]
@@ -258,8 +255,8 @@ class TCGABRCA_MIL_Dataset(Dataset):
                 # Open all the paths in this case id
                 for svs_path in self.svs_fpaths_dict[case_id]:
 
-                    print(svs_path)
-                    print(features_h5_dict[case_id])
+                    # print(svs_path)
+                    # print(features_h5_dict[case_id])
 
                     # Obtain .h5 filename
                     wsi_fname = os.path.splitext(svs_path.split('/')[-1])[0]
@@ -267,9 +264,8 @@ class TCGABRCA_MIL_Dataset(Dataset):
                     for fname in features_h5_dict[case_id]:
                         if wsi_fname in fname.split('/'):
                             feature_h5_fname = fname
-                            print(wsi_fname)
-                            print(feature_h5_fname)
-                    exit()
+                            # print(wsi_fname)
+                            # print(feature_h5_fname)
 
                     # Get the SSGEA scores
                     ssgea_scores_list = wsi_genex_label_dict[case_id]
@@ -277,10 +273,10 @@ class TCGABRCA_MIL_Dataset(Dataset):
 
                     for ssgea in ssgea_scores_list:
                         ssgea_ext = self.get_case_id(wsi_path_or_name=ssgea, mode='extended')
-                        if case_id_ext == ssgea_ext and feature_pt_fname in (features_pt_dict[case_id]):
+                        if case_id_ext == ssgea_ext and feature_h5_fname in (features_h5_dict[case_id]):
                             dataset_dict['case_id'].append(case_id)
                             dataset_dict['svs_fpath'].append(svs_path)
-                            dataset_dict['features_pt'].append(feature_pt_fname)
+                            dataset_dict['features_h5'].append(feature_h5_fname)
                             dataset_dict['ssgea_id'].append(ssgea)
                             dataset_dict['ssgsea_scores'].append(self.ssgsea_scores_dict[ssgea])
 
@@ -292,22 +288,6 @@ class TCGABRCA_MIL_Dataset(Dataset):
         assert len(dataset_dict['case_id']) == len(dataset_dict['ssgsea_scores'])
 
         return dataset_dict, wsi_genex_label_dict, features_h5_dict
-
-
-    # Method: Update paths of the features .PT files
-    def update_features_pt_paths(self):
-
-        # Get all the features .PT files
-        for idx, fpt_fname in enumerate(self.dataset_dict['features_pt']):
-            for f_dir in self.features_pt_dir:
-                f_dir_folders = [f for f in os.listdir(f_dir) if os.path.isdir(os.path.join(f_dir, f))]            
-                for folder in f_dir_folders:
-                    fpt_fpath = os.path.join(f_dir, folder, fpt_fname)
-                    if os.path.exists(fpt_fpath):
-                        self.dataset_dict['features_pt'][idx] = fpt_fpath
-        print(len(self.dataset_dict['features_pt']))
-        
-        return
 
 
     # Method: Split dataset
@@ -332,20 +312,20 @@ class TCGABRCA_MIL_Dataset(Dataset):
 
         # Split first into train-val & test
         groups = self.dataset_dict['case_id']
-        X = self.dataset_dict['features_pt']
+        X = self.dataset_dict['features_h5']
         y = self.dataset_dict['ssgsea_scores']
         for fold, (train_index, test_index) in enumerate(gss_trainval_test.split(X, y, groups)):
             trainval_dict[fold] = {
                 'case_id':[self.dataset_dict['case_id'][i] for i in train_index],
                 'svs_fpath':[self.dataset_dict['svs_fpath'][i] for i in train_index],
-                'features_pt':[self.dataset_dict['features_pt'][i] for i in train_index],
+                'features_h5':[self.dataset_dict['features_h5'][i] for i in train_index],
                 'ssgea_id':[self.dataset_dict['ssgea_id'][i] for i in train_index],
                 'ssgsea_scores':[self.dataset_dict['ssgsea_scores'][i] for i in train_index]
             }
             test_dict[fold] = {
                 'case_id':[self.dataset_dict['case_id'][i] for i in test_index],
                 'svs_fpath':[self.dataset_dict['svs_fpath'][i] for i in test_index],
-                'features_pt':[self.dataset_dict['features_pt'][i] for i in test_index],
+                'features_h5':[self.dataset_dict['features_h5'][i] for i in test_index],
                 'ssgea_id':[self.dataset_dict['ssgea_id'][i] for i in test_index],
                 'ssgsea_scores':[self.dataset_dict['ssgsea_scores'][i] for i in test_index]
             }
@@ -354,20 +334,20 @@ class TCGABRCA_MIL_Dataset(Dataset):
         # Split then into train & val
         for fold in range(self.n_folds):
             groups = trainval_dict[fold]['case_id']
-            X = trainval_dict[fold]['features_pt']
+            X = trainval_dict[fold]['features_h5']
             y = trainval_dict[fold]['ssgsea_scores']
             for _, (train_index, test_index) in enumerate(gss_train_val.split(X, y, groups)):
                 train_dict[fold] = {
                     'case_id':[trainval_dict[fold]['case_id'][i] for i in train_index],
                     'svs_fpath':[trainval_dict[fold]['svs_fpath'][i] for i in train_index],
-                    'features_pt':[trainval_dict[fold]['features_pt'][i] for i in train_index],
+                    'features_h5':[trainval_dict[fold]['features_h5'][i] for i in train_index],
                     'ssgea_id':[trainval_dict[fold]['ssgea_id'][i] for i in train_index],
                     'ssgsea_scores':[trainval_dict[fold]['ssgsea_scores'][i] for i in train_index]
                 }
                 val_dict[fold] = {
                         'case_id':[trainval_dict[fold]['case_id'][i] for i in test_index],
                         'svs_fpath':[trainval_dict[fold]['svs_fpath'][i] for i in test_index],
-                        'features_pt':[trainval_dict[fold]['features_pt'][i] for i in test_index],
+                        'features_h5':[trainval_dict[fold]['features_h5'][i] for i in test_index],
                         'ssgea_id':[trainval_dict[fold]['ssgea_id'][i] for i in test_index],
                         'ssgsea_scores':[trainval_dict[fold]['ssgsea_scores'][i] for i in test_index]
                     }
@@ -429,7 +409,7 @@ class TCGABRCA_MIL_Dataset(Dataset):
         dataset_dict = {
             'case_id':list(),
             'svs_fpath':list(),
-            'features_pt':list(),
+            'features_h5':list(),
             'ssgea_id':list(),
             'ssgsea_scores':list()
         }
@@ -449,8 +429,8 @@ class TCGABRCA_MIL_Dataset(Dataset):
         svs_path = dataset_dict['svs_fpath'][idx]
 
         # Get features .PT file
-        features_pt = dataset_dict['features_pt'][idx]
-        features = torch.load(os.path.join(features_pt))
+        features_h5 = dataset_dict['features_h5'][idx]
+        features = torch.load(os.path.join(features_h5))
 
         # Get SSGEA scores
         ssgea_id = dataset_dict['ssgea_id'][idx]
@@ -462,7 +442,7 @@ class TCGABRCA_MIL_Dataset(Dataset):
         input_data_dict = {
             'case_id':case_id,
             'svs_path':svs_path,
-            'features_pt':features_pt,
+            'features_h5':features_h5,
             'features':features,
             'ssgea_id':ssgea_id,
             'ssgsea_scores':ssgsea_scores

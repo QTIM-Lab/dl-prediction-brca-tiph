@@ -52,7 +52,7 @@ if __name__ == "__main__":
     parser.add_argument('--dataset', type=str, required=True, choices=['TCGA-BRCA'], help='The dataset for the experiments.')
     parser.add_argument('--base_data_path', type=str, required=True, help='Base data path for TCGA-BRCA dataset.')
     parser.add_argument('--experimental_strategy', type=str, choices=['All', 'DiagnosticSlide', 'TissueSlide'], required=True, help="The experimental strategy for the TCGA-BRCA dataset.")
-    parser.add_argument('--features_pt_dir', nargs='+', type=str, required=True, help="The directory of the features in .pt format for the TCGA-BRCA dataset.")
+    parser.add_argument('--features_h5_dir', nargs='+', type=str, required=True, help="The directory of the features in .pt format for the TCGA-BRCA dataset.")
     parser.add_argument(
         '--label', 
         type=str, 
@@ -122,7 +122,7 @@ if __name__ == "__main__":
             base_data_path=args.base_data_path,
             experimental_strategy=args.experimental_strategy,
             label=args.label,
-            features_pt_dir=args.features_pt_dir,
+            features_h5_dir=args.features_h5_dir,
             n_folds=int(config_json["data"]["n_folds"]),
             seed=int(args.seed)
         )
