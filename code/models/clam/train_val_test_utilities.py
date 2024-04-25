@@ -148,9 +148,9 @@ def train_val_pipeline(datasets, config_json, device, experiment_dir, checkpoint
     model_dict.update({"size_arg": model_size})
     
     # AM-SB
-    if model_type == 'tinyclam_sb':
+    if model_type == 'am_sb':
         model = AM_SB(**model_dict)
-    elif model_type == 'tinyclam_mb':
+    elif model_type == 'am_mb':
         model = AM_MB(**model_dict)
     
 
@@ -260,9 +260,9 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
     
     model_dict.update({"size_arg": model_size})
 
-    if model_type == 'tinyclam_sb':
+    if model_type == 'am_sb':
         model = AM_SB(**model_dict)
-    elif model_type == 'tinyclam_mb':
+    elif model_type == 'am_mb':
         model = AM_MB(**model_dict)
 
     # Move into model into device
