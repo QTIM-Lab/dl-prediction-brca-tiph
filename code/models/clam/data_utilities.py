@@ -252,9 +252,6 @@ class TCGABRCA_MIL_Dataset(Dataset):
         # Process the WSIs
         for case_id in self.svs_fpaths_dict.keys():
 
-            print(case_id)
-            exit()
-            
             # Check if this Case ID is part of our annotations and features
             if case_id in wsi_genex_label_dict.keys() and case_id in features_h5_dict.keys():
 
