@@ -431,9 +431,8 @@ class TCGABRCA_MIL_Dataset(Dataset):
         features_h5 = dataset_dict['features_h5'][idx]
         with h5py.File(features_h5, "r") as f:
             features = f["features"]
-            print(features.shape)
-        exit()
-        features = torch.load(os.path.join(features_h5))
+        features = torch.from_numpy(features)
+        print(features.shape)
 
         # Get SSGEA scores
         ssgea_id = dataset_dict['ssgea_id'][idx]
