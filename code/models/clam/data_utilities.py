@@ -391,23 +391,6 @@ class TCGABRCA_MIL_Dataset(Dataset):
         return
 
 
-    # Method: Get label threshold for binary classification
-    def get_label_threshold(self):
-
-        # Get the label index
-        label_idx = self.ssgsea_scores_label_idx_dict[self.label]
-        label_scores = list()
-
-        for sample in list(self.ssgsea_scores_dict.keys()):
-            if sample != 'label_names':
-                score = ssgsea_scores_dict[sample][label_idx]
-                label_scores.append(score)
-        
-        label_threshold = np.average(label_scores) if self.label_thresh_metric == 'average' else np.median(label_scores)
-
-        return label_threshold
-
-
     # Method: __len__
     def __len__(self):
         if self.curr_split == 'train':
@@ -454,8 +437,7 @@ class TCGABRCA_MIL_Dataset(Dataset):
         ssgea_id = dataset_dict['ssgea_id'][idx]
         ssgsea_scores = dataset_dict['ssgsea_scores'][idx][self.ssgsea_scores_label_idx_dict[self.label]]
         ssgsea_scores = float(ssgsea_scores)
-        if self.setting == 'binary':
-            ssgsea_scores = 1 if ssgsea_scores > self.label_threshold else 0
+        ssgsea_scores = 1 if ssgsea_scores > self.label_threshold else 0
 
         # Build input dictionary
         input_data_dict = {
@@ -468,114 +450,3 @@ class TCGABRCA_MIL_Dataset(Dataset):
         }
 
         return input_data_dict
-
-
-
-# Usage
-if __name__ == "__main__":
-
-    # Imports
-    import copy
-    import seaborn as sns
-
-
-    # EDA: Flags
-    GET_DATA_DIST = True
-    GET_CLASS_IMB_EDA = False
-
-    # Directories
-    results_dir = '/autofs/cluster/qtim/projects/breast-cancer-pathology/results/EDA/TCGA-BRCA/mmxbrcp/ssGSEA/plots/hist_kde'
-    base_data_path = '/autofs/cluster/qtim/datasets/public/TCGA-BRCA'
-    experimental_strategy = 'All'
-    features_pt_dir = [
-        '/autofs/cluster/qtim/projects/breast-cancer-pathology/results/PLIP/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/plip/pt_files', 
-        '/autofs/cluster/qtim/projects/breast-cancer-pathology/results/PLIP/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/plip/pt_files'
-    ]
-
-    labels = [
-        'hallmark_angiogenesis',
-        'hallmark_epithelial_mesenchymal_transition',
-        'hallmark_fatty_acid_metabolism',
-        'hallmark_oxidative_phosphorylation',
-        'hallmark_glycolysis',
-        'kegg_antigen_processing_and_presentation',
-        'gobp_t_cell_mediated_cytotoxicity',
-        'gobp_b_cell_proliferation',
-        'kegg_cell_cycle',
-        'immunosuppression'
-    ]
-
-    for label in labels:
-        dataset = TCGABRCA_MIL_Dataset(
-            base_data_path=base_data_path,
-            experimental_strategy=experimental_strategy,
-            setting='regression',
-            label=label,
-            features_pt_dir=features_pt_dir,
-            n_folds=1,
-            seed=42
-        )
-
-        # Create the data splits from the original dataset
-        train_set = copy.deepcopy(dataset)
-        train_set.select_split(split='train')
-
-        val_set = copy.deepcopy(dataset)
-        val_set.select_split(split='validation')
-
-        test_set = copy.deepcopy(dataset)
-        test_set.select_split(split='test')
-
-        print(f"Current label: {label}")
-
-
-        # EDA 1 - Get the class distribution
-        if GET_DATA_DIST:
-            ssgsea_scores = list()
-
-            for set in [train_set, val_set, test_set]:
-                for idx in range(len(set)):
-                    sample = set.__getitem__(idx)
-                    score = sample['ssgsea_scores']
-                    ssgsea_scores.append(score)
-            
-
-            # Plot Distribution and KDE
-            df = pd.DataFrame.from_dict(
-                data={'ssgsea_scores':ssgsea_scores}
-            )
-            sns.displot(
-                data=df,
-                x="ssgsea_scores",
-                kde=True
-            )
-
-            plt.savefig(
-                fname=os.path.join(results_dir, f"distribution_{label}.png"),
-                bbox_inches='tight'
-            )
-            plt.clf()
-            plt.close()
-            
-
-        # EDA 2 - Get the class imbalancement
-        if GET_CLASS_IMB_EDA:
-            
-            positive_counts = 0
-            negative_counts = 0
-            total_counts = 0
-
-
-            for set in [train_set, val_set, test_set]:
-                for idx in range(len(set)):
-                    sample = set.__getitem__(idx)
-                    l = sample['ssgsea_scores']
-                    if int(l) == 1:
-                        positive_counts +=1
-                    else:
-                        negative_counts += 1
-                    total_counts += 1
-
-            print(f"Positive Counts: {positive_counts} | Positive Ratio: {positive_counts/total_counts}")
-            print(f"Negative Counts: {negative_counts} | Negative Ratio: {negative_counts/total_counts}")
-            print(f"Total Counts: {total_counts} | Total Ratio: {total_counts/total_counts}")
