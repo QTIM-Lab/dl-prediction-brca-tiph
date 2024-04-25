@@ -257,8 +257,10 @@ class TCGABRCA_MIL_Dataset(Dataset):
 
                 # Open all the paths in this case id
                 for svs_path in self.svs_fpaths_dict[case_id]:
-                    
-                    
+
+                    print(svs_path)
+
+                    exit()
 
                     # Obtain .PT filename
                     feature_pt_fname = svs_path.split('/')[-1]
