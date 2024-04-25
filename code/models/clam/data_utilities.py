@@ -2,8 +2,6 @@
 import os
 import pandas as pd
 import h5py
-import numpy as np
-import matplotlib.pyplot as plt
 
 # PyTorch Imports
 import torch
@@ -432,7 +430,7 @@ class TCGABRCA_MIL_Dataset(Dataset):
         with h5py.File(features_h5, "r") as f:
             features = f["features"][()]
         features = torch.from_numpy(features)
-        print(features.shape)
+        # print(features.shape)
 
         # Get SSGEA scores
         ssgea_id = dataset_dict['ssgea_id'][idx]
