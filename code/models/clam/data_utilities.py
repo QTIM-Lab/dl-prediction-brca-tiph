@@ -244,6 +244,7 @@ class TCGABRCA_MIL_Dataset(Dataset):
         # print(self.features)
         for f in self.features:
             print(f)
+            print(f.split('/')[-2])
             case_id = self.get_case_id(wsi_path_or_name=f)
             print(case_id)
             exit()
