@@ -430,7 +430,7 @@ class TCGABRCA_MIL_Dataset(Dataset):
         # Get features .PT file
         features_h5 = dataset_dict['features_h5'][idx]
         with h5py.File(features_h5, "r") as f:
-            features = f["features"]
+            features = f["features"][()]
         features = torch.from_numpy(features)
         print(features.shape)
 
