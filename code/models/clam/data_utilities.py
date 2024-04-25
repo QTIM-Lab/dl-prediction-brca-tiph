@@ -241,10 +241,11 @@ class TCGABRCA_MIL_Dataset(Dataset):
 
         # Process the features names and obtain a dictionary that maps Case ID to filename
         features_h5_dict = dict()
-        print(self.features)
-        exit()
+        # print(self.features)
         for f in self.features:
             case_id = self.get_case_id(wsi_path_or_name=f)
+            print(case_id)
+            exit()
             if case_id not in features_h5_dict.keys():
                 features_h5_dict[case_id] = list()
             features_h5_dict[case_id].append(f)
