@@ -265,11 +265,12 @@ class TCGABRCA_MIL_Dataset(Dataset):
                     wsi_fname = svs_path.split('/')[-1]
                     feature_h5_fname = ''
                     for fname in features_h5_dict[case_id]:
+                        print(fname.split('/'))
                         if wsi_fname in fname.split('/'):
                             feature_h5_fname = fname
                             print(wsi_fname)
                             print(feature_h5_fname)
-                            exit()
+                    exit()
 
                     # Get the SSGEA scores
                     ssgea_scores_list = wsi_genex_label_dict[case_id]
