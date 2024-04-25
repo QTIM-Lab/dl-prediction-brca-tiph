@@ -1,6 +1,11 @@
 # Deep Learning-based Prediction of Breast Cancer Tumor and Immune Phenotypes from Histopathology
 Implementation of the paper "Deep Learning-based Prediction of Breast Cancer Tumor and Immune Phenotypes from Histopathology" by Tiago Gonçalves, Dagoberto Pulido-Arias, Julian Willett, Katharina V. Hoebel, Mason Cleveland, Syed Rakin Ahmed, Elizabeth Gerstner, Jayashree Kalpathy-Cramer, Jaime S. Cardoso, Christopher P. Bridge and Albert E. Kim.
 
+[paper]() | [poster](poster.pdf)
+
+# Abstract
+The interactions between tumor cells and the tumor microenvironment (TME) dictate therapeutic efficacy of radiation and many systemic therapies in breast cancer. However, to date, there is not a widely available method to reproducibly measure tumor and immune phenotypes for each patient's tumor. Given this unmet clinical need, we applied multiple instance learning (MIL) algorithms to assess activity of ten biologically relevant pathways from the hematoxylin and eosin (H&E) slide of primary breast tumors. We employed different feature extraction approaches and state-of-the-art model architectures. Using binary classification, our models attained area under the receiver operating characteristic (AUROC) scores above 0.70 for nearly all gene expression pathways and on some cases, exceeded 0.80. Attention maps suggest that our trained models recognize biologically relevant spatial patterns of cell sub-populations from H&E. These efforts represent a first step towards developing computational H&E biomarkers that reflect facets of the TME and hold promise for augmenting precision oncology.
+![](abstract_fig.png)
 
 
 # Data Preparation
@@ -100,11 +105,11 @@ echo 'Finished feature extraction using PLIP on TCGA-BRCA Database.'
 
 
 
-## Models 
-### Training
+# Models 
+## Training
 Finally, we can move forward to model training.
 
-#### Using CLAM framework
+### Using CLAM framework
 To train the AM-SB/AM-MB models, you can run the following script:
 ```bash
 #!/bin/bash
@@ -145,7 +150,7 @@ echo 'Finished CLAM (train_model_fp.py) on TCGA-BRCA Database.'
 
 ```
 
-#### Using TransMIL
+### Using TransMIL
 To train the TransMIL models, you can run the following script:
 ```bash
 #!/bin/bash
@@ -183,10 +188,10 @@ echo 'Finished TransMIL (train_model_fp.py) on TCGA-BRCA Database.'
 
 
 
-### Testing
+## Testing
 Afterward, we can move forward to model testing.
 
-#### Using CLAM framework
+### Using CLAM framework
 To test the AM-SB/AM-MB models, you can run the following script:
 ```bash
 #!/bin/bash
@@ -277,7 +282,7 @@ done
 echo 'Finished CLAM (test_model_fp.py) on TCGA-BRCA Database.'
 ```
 
-#### Using TransMIL
+### Using TransMIL
 To test the TransMIL models, you can run the following script:
 ```bash
 #!/bin/bash
@@ -381,42 +386,30 @@ echo 'Finished CLAM (create_heatmaps_fp.py) on TCGA-BRCA Database.'
 ```
 
 ### Using CLAM framework and PLIP features
-```bash
-#!/bin/bash
+WORK IN PROGRESS
 
-echo 'Started CLAM (create_heatmaps_fp.py) on TCGA-BRCA Database.'
+### Using TransMIL and CLAM/ResNet50 features
+WORK IN PROGRESS
 
-# List of checkpoint directories for AM-SB and AM-MB (PLIP Features)
-CHECKPOINT_DIRS=('results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/gobp_b_cell_proliferation/YYYY-MM-DD_hh-mm-ss' \
- 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/gobp_b_cell_proliferation/YYYY-MM-DD_hh-mm-ss' \
- 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/gobp_t_cell_mediated_cytotoxicity/YYYY-MM-DD_hh-mm-ss' \
- 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/gobp_t_cell_mediated_cytotoxicity/YYYY-MM-DD_hh-mm-ss' \
- 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_angiogenesis/YYYY-MM-DD_hh-mm-ss' \
- 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_angiogenesis/YYYY-MM-DD_hh-mm-ss' \
- 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_epithelial_mesenchymal_transition/YYYY-MM-DD_hh-mm-ss' \
- 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_epithelial_mesenchymal_transition/YYYY-MM-DD_hh-mm-ss' \
- 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_fatty_acid_metabolism/YYYY-MM-DD_hh-mm-ss' \
- 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_fatty_acid_metabolism/YYYY-MM-DD_hh-mm-ss' \
- 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_glycolysis/YYYY-MM-DD_hh-mm-ss' \
- 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_glycolysis/YYYY-MM-DD_hh-mm-ss' \
- 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_oxidative_phosphorylation/YYYY-MM-DD_hh-mm-ss' \
- 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_oxidative_phosphorylation/YYYY-MM-DD_hh-mm-ss' \
- 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/immunosuppression/YYYY-MM-DD_hh-mm-ss' \
- 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/immunosuppression/YYYY-MM-DD_hh-mm-ss' \
- 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/kegg_antigen_processing_and_presentation/YYYY-MM-DD_hh-mm-ss' \
- 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/kegg_antigen_processing_and_presentation/YYYY-MM-DD_hh-mm-ss' \
- 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/kegg_cell_cycle/YYYY-MM-DD_hh-mm-ss' \
- 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/kegg_cell_cycle/YYYY-MM-DD_hh-mm-ss')
+### Using TransMIL and PLIP features
+WORK IN PROGRESS
 
-for checkpoint_dir in "${CHECKPOINT_DIRS[@]}"
-do
-    echo "Started CLAM (create_heatmaps_fp.py) for checkpoint: $checkpoint_dir"
 
-    # PLIP Features
-    python code/models/clam/create_heatmaps_fp.py --gpu_id 0 --checkpoint_dir $checkpoint_dir --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --setting 'binary' --features_pt_dir 'results/PLIP/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/plip/pt_files' 'results/PLIP/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/plip/pt_files'
 
-    echo "Finished CLAM (create_heatmaps_fp.py) for checkpoint: $checkpoint_dir"
-done
+# Credits and Acknowledgments
+## HistoQC
+This [framework](https://github.com/choosehappy/HistoQC) is related to the papers *["HistoQC: An Open-Source Quality Control Tool for Digital Pathology Slides"](http://www.andrewjanowczyk.com/histoqc-an-open-source-quality-control-tool-for-digital-pathology-slides/)* by Janowczyk A., Zuo R., Gilmore H., Feldman M. and Madabhushi A., and *["Assessment of a computerized quantitative quality control tool for kidney whole slide image biopsies"](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8392148/)*, Chen Y., Zee J., Smith A., Jayapandian C., Hodgin J., Howell D., Palmer M., Thomas D., Cassol C., Farris A., Perkinson K., Madabhushi A., Barisoni L. and Janowczyk A..
 
-echo 'Finished CLAM (create_heatmaps_fp.py) on TCGA-BRCA Database.'
+## CLAM
+This model and associated [code](https://github.com/mahmoodlab/CLAM) are related to the paper ["Data Efficient and Weakly Supervised Computational Pathology on Whole Slide Images"](https://www.nature.com/articles/s41551-020-00682-w) by Ming Y. Lu, Drew F. K. Williamson, Tiffany Y. Chen, Richard J. Chen, Matteo Barbieri and Faisal Mahmood.
+
+## TransMIL
+This model and associated [code](https://github.com/szc19990412/TransMIL) are related to the paper "[Transformer based Correlated Multiple Instance Learning for Whole Slide Image Classification"](https://proceedings.neurips.cc/paper_files/paper/2021/hash/10c272d06794d3e5785d5e7c5356e9ff-Abstract.html) by Zhuchen Shao, Hao Bian, Yang Chen, Yifeng Wang, Jian Zhang, Xiangyang Ji and Yongbing Zhang.
+
+
+
+# Citation
+If you use this repository in your research work, please cite this paper:
+```bibtex
+WORK IN PROGRESS
 ```
