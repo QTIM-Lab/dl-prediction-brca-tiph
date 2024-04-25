@@ -1,6 +1,7 @@
 # Imports
 import os
 import pandas as pd
+import h5py
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -103,10 +104,7 @@ class TCGABRCA_MIL_Dataset(Dataset):
 
         # Class variables
         self.transform = transform
-        print(len(self.train_dict[self.curr_fold]['case_id'])+len(self.val_dict[self.curr_fold]['case_id'])+len(self.test_dict[self.curr_fold]['case_id']))
-
-        exit()
-
+        
         return
 
 
@@ -173,7 +171,7 @@ class TCGABRCA_MIL_Dataset(Dataset):
                 folder_files = [f for f in os.listdir(os.path.join(f_dir, folder)) if not f.startswith('.')]
                 if 'original.h5' in folder_files:
                     features_h5_files.append(os.path.join(f_dir, folder, 'original.h5'))
-        print(len(features_h5_files))
+        # print(len(features_h5_files))
 
         return features_h5_files
 
@@ -431,6 +429,10 @@ class TCGABRCA_MIL_Dataset(Dataset):
 
         # Get features .PT file
         features_h5 = dataset_dict['features_h5'][idx]
+        with h5py.File(features_h5, "r") as f:
+            features = f["features"]
+            print(features.shape)
+        exit()
         features = torch.load(os.path.join(features_h5))
 
         # Get SSGEA scores
