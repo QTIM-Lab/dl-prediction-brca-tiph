@@ -170,8 +170,7 @@ class TCGABRCA_MIL_Dataset(Dataset):
                 folder_files = [f for f in os.listdir(os.path.join(f_dir, folder)) if not f.startswith('.')]
                 if 'original.h5' in folder_files:
                     features_pt_files += ['original.h5']
-        print(len(features_pt_files))
-        exit()
+
         return features_pt_files
 
 
