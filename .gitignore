@@ -161,3 +161,6 @@ cython_debug/
 
 # Directories and OS generated files
 *.DS_Store
+wandb/
+*.err
+*.out
