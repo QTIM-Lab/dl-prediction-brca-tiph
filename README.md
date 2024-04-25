@@ -135,12 +135,12 @@ do
     echo "Started CLAM (train_model_fp.py) for label: $label"
     
     # CLAM (ResNet50) Features
-    python code/models/clam/train_val_model_fp.py --gpu_id 0 --results_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints' --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --setting 'binary' --features_pt_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/clam/pt_files' 'results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/clam/pt_files' --label $label --config_json 'code/models/clam/config/tcgabrca_clam_fts_am_sb_config.json'
+    python code/models/clam/train_val_model_fp.py --gpu_id 0 --results_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints' --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --features_pt_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/clam/pt_files' 'results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/clam/pt_files' --label $label --config_json 'code/models/clam/config/tcgabrca_clam_fts_am_sb_config.json'
     
-    python code/models/clam/train_val_model_fp.py --gpu_id 0 --results_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints' --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --setting 'binary' --features_pt_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/clam/pt_files' 'results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/clam/pt_files' --label $label --config_json 'code/models/clam/config/tcgabrca_clam_fts_am_mb_config.json'
+    python code/models/clam/train_val_model_fp.py --gpu_id 0 --results_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints' --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --features_pt_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/clam/pt_files' 'results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/clam/pt_files' --label $label --config_json 'code/models/clam/config/tcgabrca_clam_fts_am_mb_config.json'
     
     # PLIP Features
-    python code/models/clam/train_val_model_fp.py --gpu_id 0 --results_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints' --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --setting 'binary' --features_pt_dir 'results/PLIP/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/plip/pt_files' 'results/PLIP/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/plip/pt_files' --label $label --config_json 'code/models/clam/config/tcgabrca_plip_fts_am_sb_config.json'
+    python code/models/clam/train_val_model_fp.py --gpu_id 0 --results_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints' --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --features_pt_dir 'results/PLIP/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/plip/pt_files' 'results/PLIP/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/plip/pt_files' --label $label --config_json 'code/models/clam/config/tcgabrca_plip_fts_am_sb_config.json'
     
     python code/models/clam/train_val_model_fp.py --gpu_id 0 --results_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints' --dataset 'TCGA-BRCA' --base_data_path 'results/PLIP/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/plip/pt_files' 'results/PLIP/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/plip/pt_files' --label $label --config_json 'code/models/clam/config/tcgabrca_plip_fts_am_mb_config.json'
 
@@ -176,10 +176,10 @@ do
     echo "Started TransMIL (train_model_fp.py) for label: $label"
     
     # CLAM (ResNet50) Features
-    python code/models/transmil/train_test_model_fp.py --gpu_id 0 --results_dir 'results/TransMIL/TCGA-BRCA/mmxbrcp/All/checkpoints' --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --setting 'binary' --features_pt_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/clam/pt_files' 'results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/clam/pt_files' --label $label --config_json 'code/models/transmil/config/tcgabrca_clam_fts_transmil_config.json' --train_or_test 'train'
+    python code/models/transmil/train_test_model_fp.py --gpu_id 0 --results_dir 'results/TransMIL/TCGA-BRCA/mmxbrcp/All/checkpoints' --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --features_pt_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/clam/pt_files' 'results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/clam/pt_files' --label $label --config_json 'code/models/transmil/config/tcgabrca_clam_fts_transmil_config.json' --train_or_test 'train'
     
     # PLIP Features
-    python code/models/transmil/train_test_model_fp.py --gpu_id 0 --results_dir 'results/TransMIL/TCGA-BRCA/mmxbrcp/All/checkpoints' --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --setting 'binary' --features_pt_dir 'results/PLIP/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/plip/pt_files' 'results/PLIP/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/plip/pt_files' --label $label --config_json 'code/models/transmil/config/tcgabrca_plip_fts_transmil_config.json' --train_or_test 'train'
+    python code/models/transmil/train_test_model_fp.py --gpu_id 0 --results_dir 'results/TransMIL/TCGA-BRCA/mmxbrcp/All/checkpoints' --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --features_pt_dir 'results/PLIP/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/plip/pt_files' 'results/PLIP/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/plip/pt_files' --label $label --config_json 'code/models/transmil/config/tcgabrca_plip_fts_transmil_config.json' --train_or_test 'train'
 
     echo "Finished TransMIL (train_model_fp.py) for label: $label"
 done
@@ -216,7 +216,7 @@ do
     echo "Started CLAM (test_model_fp.py) for checkpoint: $checkpoint_dir"
     
     # CLAM/ResNet50 Features
-    python code/models/clam/test_model_fp.py --gpu_id 0 --checkpoint_dir $checkpoint_dir --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --setting 'binary' --features_pt_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/clam/pt_files' 'results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/clam/pt_files'
+    python code/models/clam/test_model_fp.py --gpu_id 0 --checkpoint_dir $checkpoint_dir --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --features_pt_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/clam/pt_files' 'results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/clam/pt_files'
 
     echo "Finished CLAM (test_model_fp.py) for checkpoint: $checkpoint_dir"
 done
@@ -240,7 +240,7 @@ do
     echo "Started CLAM (test_model_fp.py) for checkpoint: $checkpoint_dir"
     
     # CLAM/ResNet50 Features
-    python code/models/clam/test_model_fp.py --gpu_id 0 --checkpoint_dir $checkpoint_dir --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --setting 'binary' --features_pt_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/clam/pt_files' 'results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/clam/pt_files'
+    python code/models/clam/test_model_fp.py --gpu_id 0 --checkpoint_dir $checkpoint_dir --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --features_pt_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/clam/pt_files' 'results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/clam/pt_files'
 
     echo "Finished CLAM (test_model_fp.py) for checkpoint: $checkpoint_dir"
 done
@@ -275,7 +275,7 @@ do
     echo "Started CLAM (test_model_fp.py) for checkpoint: $checkpoint_dir"
     
     # PLIP Features
-    python code/models/clam/test_model_fp.py --gpu_id 0 --checkpoint_dir $checkpoint_dir --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --setting 'binary' --features_pt_dir 'results/PLIP/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/plip/pt_files' 'results/PLIP/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/plip/pt_files'
+    python code/models/clam/test_model_fp.py --gpu_id 0 --checkpoint_dir $checkpoint_dir --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --features_pt_dir 'results/PLIP/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/plip/pt_files' 'results/PLIP/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/plip/pt_files'
 
     echo "Finished CLAM (test_model_fp.py) for checkpoint: $checkpoint_dir"
 done
@@ -307,7 +307,7 @@ do
     echo "Started TransMIL (train_test_model_fp.py) for checkpoint directory: $checkpoint_dir"
     
     # CLAM/ResNet50-based features
-    python code/models/transmil/train_test_model_fp.py --gpu_id 0 --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --setting 'binary' --features_pt_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/clam/pt_files' 'results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/clam/pt_files' --checkpoint_dir $checkpoint_dir --train_or_test 'test'
+    python code/models/transmil/train_test_model_fp.py --gpu_id 0 --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --features_pt_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/clam/pt_files' 'results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/clam/pt_files' --checkpoint_dir $checkpoint_dir --train_or_test 'test'
     
     echo "Finished TransMIL (train_test_model_fp.py) for checkpoint directory: $checkpoint_dir"
 done
@@ -331,7 +331,7 @@ do
     echo "Started TransMIL (train_test_model_fp.py) for checkpoint directory: $checkpoint_dir"
 
     # PLIP-based features
-    python code/models/transmil/train_test_model_fp.py --gpu_id 0 --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --setting 'binary' --features_pt_dir 'results/PLIP/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/plip/pt_files' 'results/PLIP/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/plip/pt_files' --checkpoint_dir $checkpoint_dir --train_or_test 'test'
+    python code/models/transmil/train_test_model_fp.py --gpu_id 0 --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --features_pt_dir 'results/PLIP/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/plip/pt_files' 'results/PLIP/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/plip/pt_files' --checkpoint_dir $checkpoint_dir --train_or_test 'test'
     
     echo "Finished TransMIL (train_test_model_fp.py) for checkpoint directory: $checkpoint_dir"
 done
@@ -378,7 +378,7 @@ do
     echo "Started CLAM (create_heatmaps_fp.py) for checkpoint: $checkpoint_dir"
     
     # CLAM Features
-    python code/models/clam/create_heatmaps_fp.py --gpu_id 0 --checkpoint_dir $checkpoint_dir --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --setting 'binary' --features_pt_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/clam/pt_files' 'results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/clam/pt_files' --generate_heatmaps_for 'test' --heatmap_config_file 'code/models/clam/config/tcgabrca_clam_fts_am_sb_heatmap_config.json' --use_histoqc_quality_file 'results/HistoQC/TCGA-BRCA/mmxbrcp/hqc_quality_file.csv' --use_histoqc_seg_masks --verbose
+    python code/models/clam/create_heatmaps_fp.py --gpu_id 0 --checkpoint_dir $checkpoint_dir --dataset 'TCGA-BRCA' --base_data_path 'data/TCGA-BRCA' --experimental_strategy 'All' --features_pt_dir 'results/CLAM/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features/clam/pt_files' 'results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features/clam/pt_files' --generate_heatmaps_for 'test' --heatmap_config_file 'code/models/clam/config/tcgabrca_clam_fts_am_sb_heatmap_config.json' --use_histoqc_quality_file 'results/HistoQC/TCGA-BRCA/mmxbrcp/hqc_quality_file.csv' --use_histoqc_seg_masks --verbose
 
     echo "Finished CLAM (create_heatmaps_fp.py) for checkpoint: $checkpoint_dir"
 done
