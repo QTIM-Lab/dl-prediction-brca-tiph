@@ -263,6 +263,7 @@ class TCGABRCA_MIL_Dataset(Dataset):
 
                     # Obtain .h5 filename
                     wsi_fname = svs_path.split('/')[-1].split('.')[0]
+                    print(wsi_fname)
                     feature_h5_fname = ''
                     for fname in features_h5_dict[case_id]:
                         print(fname.split('/'))
