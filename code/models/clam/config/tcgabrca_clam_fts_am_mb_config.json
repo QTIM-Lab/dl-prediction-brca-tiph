@@ -9,7 +9,6 @@
     },
 
     "hyperparameters": {
-        "label_thresh_metric": "zero",
         "epochs": 300,
         "lr": 2e-4,
         "weight_decay": 1e-5,
