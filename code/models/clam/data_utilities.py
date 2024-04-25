@@ -165,11 +165,12 @@ class TCGABRCA_MIL_Dataset(Dataset):
         features_pt_files = list()
 
         for f_dir in self.features_pt_dir:
-            print(f_dir)
             f_dir_folders = [f for f in os.listdir(f_dir) if os.path.isdir(os.path.join(f_dir, f))]            
-            print(f_dir_folders)
-            # f_dir_pt_files = [f for f in os.listdir(f_dir) if not f.startswith('.')]
-            # features_pt_files += f_dir_pt_files
+            for folder in f_dir_folders:
+                folder_files = [f for f in os.listdir(f_dir, folder) if not f.startswith('.')]
+                if 'original.h5' in folder_files:
+                    features_pt_files += ['original.h5']
+        print(len(features_pt_files))
         exit()
         return features_pt_files
 
