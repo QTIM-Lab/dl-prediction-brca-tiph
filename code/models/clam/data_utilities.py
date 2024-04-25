@@ -259,6 +259,7 @@ class TCGABRCA_MIL_Dataset(Dataset):
                 for svs_path in self.svs_fpaths_dict[case_id]:
 
                     print(svs_path)
+                    print(features_h5_dict[case_id])
 
                     exit()
 
