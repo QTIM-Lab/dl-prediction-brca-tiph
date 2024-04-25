@@ -261,10 +261,15 @@ class TCGABRCA_MIL_Dataset(Dataset):
                     print(svs_path)
                     print(features_h5_dict[case_id])
 
-                    exit()
-
-                    # Obtain .PT filename
-                    feature_pt_fname = svs_path.split('/')[-1]
+                    # Obtain .h5 filename
+                    wsi_fname = svs_path.split('/')[-1]
+                    feature_h5_fname = ''
+                    for fname in features_h5_dict[case_id]:
+                        if wsi_fname in fname.split('/'):
+                            feature_h5_fname = fname
+                            print(wsi_fname)
+                            print(feature_h5_fname)
+                            exit()
                     feature_pt_fname = feature_pt_fname[0:-4] + '.pt'
 
                     # Get the SSGEA scores
