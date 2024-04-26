@@ -1,6 +1,8 @@
 # Deep Learning-based Prediction of Breast Cancer Tumor and Immune Phenotypes from Histopathology
 Implementation of the paper "Deep Learning-based Prediction of Breast Cancer Tumor and Immune Phenotypes from Histopathology" by Tiago Gonçalves, Dagoberto Pulido-Arias, Julian Willett, Katharina V. Hoebel, Mason Cleveland, Syed Rakin Ahmed, Elizabeth Gerstner, Jayashree Kalpathy-Cramer, Jaime S. Cardoso, Christopher P. Bridge and Albert E. Kim.
 
+Paper accepted at the First Workshop on [Imageomics (Imageomics-AAAI-24) - Discovering Biological Knowledge from Images using AI](https://sites.google.com/vt.edu/imageomics-aaai-24/home), held as part of the [38th Annual AAAI Conference on Artificial Intelligence](https://aaai.org/aaai-conference/).
+
 [paper](https://arxiv.org/abs/2404.16397) | [poster](poster.pdf)
 
 # Abstract
