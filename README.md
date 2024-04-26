@@ -1,7 +1,7 @@
 # Deep Learning-based Prediction of Breast Cancer Tumor and Immune Phenotypes from Histopathology
 Implementation of the paper "Deep Learning-based Prediction of Breast Cancer Tumor and Immune Phenotypes from Histopathology" by Tiago Gonçalves, Dagoberto Pulido-Arias, Julian Willett, Katharina V. Hoebel, Mason Cleveland, Syed Rakin Ahmed, Elizabeth Gerstner, Jayashree Kalpathy-Cramer, Jaime S. Cardoso, Christopher P. Bridge and Albert E. Kim.
 
-[paper]() | [poster](poster.pdf)
+[paper](https://arxiv.org/abs/2404.16397) | [poster](poster.pdf)
 
 # Abstract
 The interactions between tumor cells and the tumor microenvironment (TME) dictate therapeutic efficacy of radiation and many systemic therapies in breast cancer. However, to date, there is not a widely available method to reproducibly measure tumor and immune phenotypes for each patient's tumor. Given this unmet clinical need, we applied multiple instance learning (MIL) algorithms to assess activity of ten biologically relevant pathways from the hematoxylin and eosin (H&E) slide of primary breast tumors. We employed different feature extraction approaches and state-of-the-art model architectures. Using binary classification, our models attained area under the receiver operating characteristic (AUROC) scores above 0.70 for nearly all gene expression pathways and on some cases, exceeded 0.80. Attention maps suggest that our trained models recognize biologically relevant spatial patterns of cell sub-populations from H&E. These efforts represent a first step towards developing computational H&E biomarkers that reflect facets of the TME and hold promise for augmenting precision oncology.
@@ -412,5 +412,12 @@ This model and associated [code](https://github.com/szc19990412/TransMIL) are re
 # Citation
 If you use this repository in your research work, please cite this paper:
 ```bibtex
-WORK IN PROGRESS
+@misc{gonçalves2024deep,
+      title={{Deep Learning-based Prediction of Breast Cancer Tumor and Immune Phenotypes from Histopathology}}, 
+      author={Tiago Gonçalves and Dagoberto Pulido-Arias and Julian Willett and Katharina V. Hoebel and Mason Cleveland and Syed Rakin Ahmed and Elizabeth Gerstner and Jayashree Kalpathy-Cramer and Jaime S. Cardoso and Christopher P. Bridge and Albert E. Kim},
+      year={2024},
+      eprint={2404.16397},
+      archivePrefix={{arXiv}},
+      primaryClass={{eess.IV}}
+}
 ```
