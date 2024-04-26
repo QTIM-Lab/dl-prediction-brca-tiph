@@ -405,7 +405,7 @@ This [framework](https://github.com/choosehappy/HistoQC) is related to the paper
 This model and associated [code](https://github.com/mahmoodlab/CLAM) are related to the paper ["Data Efficient and Weakly Supervised Computational Pathology on Whole Slide Images"](https://www.nature.com/articles/s41551-020-00682-w) by Ming Y. Lu, Drew F. K. Williamson, Tiffany Y. Chen, Richard J. Chen, Matteo Barbieri and Faisal Mahmood.
 
 ## TransMIL
-This model and associated [code](https://github.com/szc19990412/TransMIL) are related to the paper "[Transformer based Correlated Multiple Instance Learning for Whole Slide Image Classification"](https://proceedings.neurips.cc/paper_files/paper/2021/hash/10c272d06794d3e5785d5e7c5356e9ff-Abstract.html) by Zhuchen Shao, Hao Bian, Yang Chen, Yifeng Wang, Jian Zhang, Xiangyang Ji and Yongbing Zhang.
+This model and associated [code](https://github.com/szc19990412/TransMIL) are related to the paper ["Transformer based Correlated Multiple Instance Learning for Whole Slide Image Classification"](https://proceedings.neurips.cc/paper_files/paper/2021/hash/10c272d06794d3e5785d5e7c5356e9ff-Abstract.html) by Zhuchen Shao, Hao Bian, Yang Chen, Yifeng Wang, Jian Zhang, Xiangyang Ji and Yongbing Zhang.
 
 
 
