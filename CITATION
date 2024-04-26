@@ -1,8 +1,8 @@
 @misc{gonçalves2024deep,
-      title={Deep Learning-based Prediction of Breast Cancer Tumor and Immune Phenotypes from Histopathology}, 
+      title={{Deep Learning-based Prediction of Breast Cancer Tumor and Immune Phenotypes from Histopathology}}, 
       author={Tiago Gonçalves and Dagoberto Pulido-Arias and Julian Willett and Katharina V. Hoebel and Mason Cleveland and Syed Rakin Ahmed and Elizabeth Gerstner and Jayashree Kalpathy-Cramer and Jaime S. Cardoso and Christopher P. Bridge and Albert E. Kim},
       year={2024},
       eprint={2404.16397},
-      archivePrefix={arXiv},
-      primaryClass={eess.IV}
+      archivePrefix={{arXiv}},
+      primaryClass={{eess.IV}}
 }
