@@ -112,7 +112,7 @@ def load_datataloader_and_model(dataset, config_json, device, checkpoint_dir, fo
 
 
 # Function: Perform inference for single slide
-def infer_single_slide(model, features, device, label, model_type, k=1, verbose=True):
+def infer_single_slide(model, features, device, label, model_type, verbose=True):
 
     assert model_type in ('am_sb', 'am_mb')
 
@@ -139,21 +139,9 @@ def infer_single_slide(model, features, device, label, model_type, k=1, verbose=
         A = torch.reshape(A, (-1, 1)).cpu().numpy()
 
         if verbose:
-            print('y_pred: {}, y_gt: {}, y_prob: {}'.format(y_pred, label, ["{:.4f}".format(p) for p in y_proba.cpu().flatten()]))	
-        
+            print('y_pred: {}, y_gt: {}, y_prob: {}'.format(y_pred, label, ["{:.4f}".format(p) for p in y_proba.cpu().flatten()]))
 
-        # Get the probabilities and their arg values
-        probs, ids = torch.topk(y_proba, k)
-
-        # We change this implementation (from the original paper)...:
-        # probs = probs[-1].cpu().numpy()
-        # ids = ids[-1].cpu().numpy()
-        
-        #... to a clean and clear approach (i.e., squeeze the batch dimension)
-        probs = torch.squeeze(probs, 0).cpu().numpy()
-        ids = torch.squeeze(ids, 0).cpu().numpy()
-
-    return ids, probs, A, y_pred, label
+    return y_pred, y_proba.cpu().flatten(), label, A
 
 
 
@@ -232,7 +220,6 @@ if __name__ == '__main__':
     parser.add_argument('--dataset', type=str, required=True, choices=['TCGA-BRCA'], help='The dataset for the experiments.')
     parser.add_argument('--base_data_path', type=str, required=True, help='Base data path for TCGA-BRCA dataset.')
     parser.add_argument('--experimental_strategy', type=str, choices=['All', 'DiagnosticSlide', 'TissueSlide'], required=True, help="The experimental strategy for the TCGA-BRCA dataset.")
-    parser.add_argument('--setting', type=str, choices=['binary', 'multiclass', 'ordinal'], required=True, help='The classification setting for the TCGA-BRCA dataset.')
     parser.add_argument('--features_h5_dir', nargs='+', type=str, required=True, help="The directory of the features in .pt format for the TCGA-BRCA dataset.")
     parser.add_argument('--generate_heatmaps_for', type=str, default='test', choices=["train", "validation", "test"], help="The data split to obtain heatmaps.")
     parser.add_argument('--heatmap_config_file', type=str, required=True, help="The configuration JSON file for the heatmap generation.")
@@ -267,7 +254,6 @@ if __name__ == '__main__':
         dataset = TCGABRCA_MIL_Dataset(
             base_data_path=args.base_data_path,
             experimental_strategy=args.experimental_strategy,
-            setting=args.setting,
             label=args.checkpoint_dir.split('/')[-2],
             label_thresh_metric=config_json["hyperparameters"]["label_thresh_metric"],
             features_h5_dir=args.features_h5_dir,
@@ -320,52 +306,39 @@ if __name__ == '__main__':
             fold=fold
         )
 
-        # Check if there is a .CSV file with the data split and fold
+        # Generate a CSV for the data split and folds
         split_fold_csv = f"{args.generate_heatmaps_for}_set_kf{fold}.csv"
-        if not os.path.exists(os.path.join(args.checkpoint_dir, split_fold_csv)):
 
-            csv_data_dict = {
-                'case_id':list(),
-                'svs_path':list(),
-                'features_h5':list(),
-                'ssgea_id':list(),
-                'ssgsea_scores':list()
-            }
+        csv_data_dict = {
+            'case_id':list(),
+            'svs_path':list(),
+            'features_h5':list(),
+            'ssgea_id':list(),
+            'ssgsea_scores':list()
+        }
 
-            # Go through the dataloader to generate a CSV with certain information
-            with torch.no_grad():
-                for _, input_data_dict in enumerate(dataloder):
-                    
-                    # Get data
-                    case_id = input_data_dict['case_id'][0]
-                    svs_path = input_data_dict['svs_path'][0]
-                    features_h5 = input_data_dict['features_h5'][0]
-                    # features = input_data_dict['features'][0]
-                    ssgea_id = input_data_dict['ssgea_id'][0]
-                    ssgsea_scores = input_data_dict['ssgsea_scores'].item()
+        # Go through the dataloader to generate a CSV with certain information
+        with torch.no_grad():
+            for _, input_data_dict in enumerate(dataloder):
+                
+                # Get data
+                case_id = input_data_dict['case_id'][0]
+                svs_path = input_data_dict['svs_path'][0]
+                features_h5 = input_data_dict['features_h5'][0]
+                ssgea_id = input_data_dict['ssgea_id'][0]
+                ssgsea_scores = input_data_dict['ssgsea_scores'].item()
 
-                    # Sanity check
-                    # print(case_id)
-                    # print(svs_path)
-                    # print(features_h5)
-                    # print(ssgea_id)
-                    # print(ssgsea_scores)
-
-                    # Append this to the CSV data dict
-                    csv_data_dict['case_id'].append(case_id)
-                    csv_data_dict['svs_path'].append(svs_path)
-                    csv_data_dict['features_h5'].append(features_h5)
-                    csv_data_dict['ssgea_id'].append(ssgea_id)
-                    csv_data_dict['ssgsea_scores'].append(ssgsea_scores)
+                # Append this to the CSV data dict
+                csv_data_dict['case_id'].append(case_id)
+                csv_data_dict['svs_path'].append(svs_path)
+                csv_data_dict['features_h5'].append(features_h5)
+                csv_data_dict['ssgea_id'].append(ssgea_id)
+                csv_data_dict['ssgsea_scores'].append(ssgsea_scores)
 
 
-            # Create CSV
-            csv_data_df = pd.DataFrame.from_dict(csv_data_dict)
-            csv_data_df.to_csv(os.path.join(args.checkpoint_dir, split_fold_csv))
-        
-        else:
-            csv_data_df = pd.read_csv(os.path.join(args.checkpoint_dir, split_fold_csv))
-        # print(csv_data_df.head())
+        # Create CSV
+        csv_data_df = pd.DataFrame.from_dict(csv_data_dict)
+        csv_data_df.to_csv(os.path.join(args.checkpoint_dir, split_fold_csv))
 
 
         # HistoQC: Quality Assessment of WSI
@@ -538,7 +511,7 @@ if __name__ == '__main__':
 
             
             # Get predictions, predictions probabilities and attention scores
-            y_preds, y_probas, attention_scores, y_pred, label = infer_single_slide(
+            y_pred, y_probas, label, attention_scores = infer_single_slide(
                 model=model, 
                 features=features,
                 device=device,
@@ -589,7 +562,7 @@ if __name__ == '__main__':
                     if heatmap_args['calc_heatmap']:
                         asset_dict = compute_from_patches(
                             model_type=config_json["hyperparameters"]["model_type"],
-                            y_pred=y_preds[0],
+                            y_pred=y_pred,
                             model=model,
                             features=features,
                             coords=coords,
@@ -653,11 +626,14 @@ if __name__ == '__main__':
                         print(f"Saved original WSI image at: {os.path.join(slide_save_dir, wsi_img_save_name)}")
                     del wsi_img
 
-                    
-                # Save a .txt file with the label
-                l = open(os.path.join(slide_save_dir, f"{label}.txt"), "w")
-                l.close()
+                
 
-                # Save .txt file with the probabilities
-                p = open(os.path.join(slide_save_dir, f"{y_probas}.txt"), "w")
-                p.close()
+                # Create small CSV with this important information
+                info_dict = dict()
+                info_dict["label"] = [label]
+                info_dict["y_pred"] = [y_pred]
+                for c, p in enumerate(y_probas):
+                    info_dict[f"y_probas_{c}"] = [p]
+                
+                info_df = pd.DataFrame.from_dict(info_dict)
+                info_df.to_csv(os.path.join(slide_save_dir, f"info.csv"))

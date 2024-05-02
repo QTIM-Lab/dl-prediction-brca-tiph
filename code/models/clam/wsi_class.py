@@ -107,19 +107,26 @@ class WholeSlideImage(object):
 
     # Method: Initialize CLAM Segmentation
     def initSegmentation(self, mask_file):
-        # load segmentation results from pickle file
-        import pickle
+
+        # Load segmentation results from pickle file
         asset_dict = load_pkl(mask_file)
         self.holes_tissue = asset_dict['holes']
         self.contours_tissue = asset_dict['tissue']
 
+        return
 
+
+    # Method: Save CLAM Segmentation
     def saveSegmentation(self, mask_file):
-        # save segmentation results using pickle
+
+        # Save segmentation results using pickle
         asset_dict = {'holes': self.holes_tissue, 'tissue': self.contours_tissue}
         save_pkl(mask_file, asset_dict)
 
+        return
 
+
+    # Method: Performa CLAM Segmentation
     def segmentTissue(self, seg_level=0, sthresh=20, sthresh_up = 255, mthresh=7, close = 0, use_otsu=False, 
                             filter_params={'a_t':100}, ref_patch_size=512, exclude_ids=[], keep_ids=[]):
         """
