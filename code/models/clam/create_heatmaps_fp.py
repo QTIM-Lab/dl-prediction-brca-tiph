@@ -501,12 +501,14 @@ if __name__ == '__main__':
             # print(patches_path)
 
 
-            # Load features 
-            features = torch.load(features_path)
+            # Load features
+            with h5py.File(features_path, "r") as f:
+                features = f["features"][()]
+            features = torch.from_numpy(features)
 
             # Load coordinates
-            h5file = h5py.File(patches_path)
-            coords = h5file['coords'][:]
+            with h5py.File(patches_path, "r") as p:
+                coords = p['coords'][:]
 
             
             # Get predictions, predictions probabilities and attention scores
