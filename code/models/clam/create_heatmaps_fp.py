@@ -497,6 +497,7 @@ if __name__ == '__main__':
             # Get the path to the patches coordinates
             base_path_idx = features_path.find('features')
             base_path = features_path[0:base_path_idx]
+            print("base_path ", base_path)
             patches_path = os.path.join(base_path, 'patches', slide_id+'.h5')
             # print(patches_path)
 
