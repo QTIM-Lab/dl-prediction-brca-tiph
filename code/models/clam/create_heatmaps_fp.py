@@ -141,7 +141,7 @@ def infer_single_slide(model, features, device, label, model_type, verbose=True)
         if verbose:
             print('y_pred: {}, y_gt: {}, y_prob: {}'.format(y_pred, label, ["{:.4f}".format(p) for p in y_proba.cpu().flatten()]))
 
-    return y_pred, y_proba.cpu().flatten(), label, A
+    return y_pred, y_proba.cpu().flatten().numpy(), label, A
 
 
 
