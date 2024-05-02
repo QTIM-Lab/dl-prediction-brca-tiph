@@ -498,7 +498,7 @@ if __name__ == '__main__':
             # Get the path to the patches coordinates
             base_path_idx = features_path.find('features')
             base_path = features_path[0:base_path_idx]
-            print("base_path ", base_path)
+            # print("base_path ", base_path)
             base_path_split = base_path.split('/')
             next_ = False
             for s_idx, s_str in enumerate(base_path_split):
@@ -509,14 +509,10 @@ if __name__ == '__main__':
                     if s_str == "results":
                         next_ = True
             base_path = "/".join(base_path_split)
-            print("base_path ", base_path)
-            exit()
-
+            # print("base_path ", base_path)
 
             patches_path = os.path.join(base_path, 'patches', slide_id+'.h5')
             # print(patches_path)
-
-            patches_from
 
 
             # Load features
