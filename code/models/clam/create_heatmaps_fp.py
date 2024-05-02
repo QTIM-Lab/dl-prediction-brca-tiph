@@ -531,8 +531,7 @@ if __name__ == '__main__':
                 features=features,
                 device=device,
                 label=row['ssgsea_scores'], 
-                model_type=config_json["hyperparameters"]["model_type"], 
-                k=config_json["data"]["n_classes"],
+                model_type=config_json["hyperparameters"]["model_type"],
                 verbose=verbose
             )
 
