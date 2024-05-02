@@ -504,6 +504,7 @@ if __name__ == '__main__':
             for s_idx, s_str in enumerate(base_path_split):
                 if next_:
                     base_path_split[s_idx] = args.patches_from
+                    break
                 else:
                     if s_str == "results":
                         next_ = True
