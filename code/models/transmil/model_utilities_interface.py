@@ -224,7 +224,7 @@ class  ModelInterface(pl.LightningModule):
         self.log('val_loss', self.val_loss(logits, target.squeeze()), prog_bar=True, on_epoch=True, logger=True)
 
         # Compute AUC
-        self.log('val_auc', self.AUROC(probs, target.squeeze()), prog_bar=True, on_epoch=True, logger=True)
+        self.log('val_auroc', self.AUROC(probs, target.squeeze()), prog_bar=True, on_epoch=True, logger=True)
 
         # Log metrics to WandB
         self.log_dict(self.valid_metrics(max_probs.squeeze() , target.squeeze()), on_epoch = True, logger = True)
@@ -293,7 +293,7 @@ class  ModelInterface(pl.LightningModule):
         metrics = self.test_metrics(max_probs.squeeze() , target.squeeze())
 
         # Add these metrics to the dictionary
-        test_metrics['test_auc'] = [test_auc.cpu().numpy().item()]
+        test_metrics['test_auroc'] = [test_auc.cpu().numpy().item()]
         for keys, values in metrics.items():
             test_metrics[keys] = [values.cpu().numpy().item()]
 
