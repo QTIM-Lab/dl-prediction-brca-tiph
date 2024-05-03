@@ -82,7 +82,7 @@ class  ModelInterface(pl.LightningModule):
         self.data = [{"count": 0, "correct": 0} for _ in range(self.n_classes)]
 
         #  Metrics, byt TorchMetrics
-        self.AUROC = torchmetrics.AUROC(num_classes=self.n_classes, average='macro', task='multiclass'),
+        self.AUROC = torchmetrics.AUROC(num_classes=self.n_classes, average='macro', task='multiclass')
         metrics = torchmetrics.MetricCollection(
             [
                 torchmetrics.Accuracy(num_classes=self.n_classes, average='micro', task='multiclass'),
