@@ -100,11 +100,5 @@ class TransMIL(nn.Module):
         Y_hat = torch.argmax(logits, dim=1)
         Y_prob = F.softmax(logits, dim = 1)
         results_dict = {'logits': logits, 'Y_prob': Y_prob, 'Y_hat': Y_hat}
+        
         return results_dict
-
-if __name__ == "__main__":
-    data = torch.randn((1, 6000, 1024)).cuda()
-    model = TransMIL(n_classes=2).cuda()
-    print(model.eval())
-    results_dict = model(data = data)
-    print(results_dict)

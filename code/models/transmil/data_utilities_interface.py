@@ -14,7 +14,7 @@ from data_utilities_datasets import TCGABRCA_MIL_Dataset
 class DataInterface(pl.LightningDataModule):
 
     # Method: __init__
-    def __init__(self, batch_size=1, num_workers=4, pin_memory=True, dataset_name=None, fold=None, fusion_strategy=None, setting=None, dataset_args=None):       
+    def __init__(self, batch_size=1, num_workers=4, pin_memory=True, dataset_name=None, fold=None, dataset_args=None):       
         super().__init__()
 
         self.batch_size = batch_size
@@ -22,8 +22,6 @@ class DataInterface(pl.LightningDataModule):
         self.pin_memory = pin_memory
         self.dataset_name = dataset_name
         self.fold = fold
-        self.fusion_strategy = fusion_strategy
-        self.setting = setting
         self.dataset_args = dataset_args
 
         return

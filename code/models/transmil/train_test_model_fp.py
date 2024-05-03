@@ -29,10 +29,7 @@ if __name__ == '__main__':
     parser.add_argument('--dataset', type=str, required=True, choices=['TCGA-BRCA'], help='The dataset for the experiments.')
     parser.add_argument('--base_data_path', type=str, required=True, help='Base data path for TCGA-BRCA dataset.')
     parser.add_argument('--experimental_strategy', type=str, choices=['All', 'DiagnosticSlide', 'TissueSlide'], required=True, help="The experimental strategy for the TCGA-BRCA dataset.")
-    parser.add_argument('--setting', type=str, choices=['binary', 'multiclass', 'ordinal'], required=True, help='The classification setting for the TCGA-BRCA dataset.')
-    parser.add_argument('--features_pt_dir', nargs='+', type=str, required=False, help="The directory of the features in .pt format for the TCGA-BRCA dataset.")
-    parser.add_argument('--fusion_strategy', type=str, choices=['early', 'middle', 'late'], required=False, help="The data fusion strategy for the models.")
-    parser.add_argument('--features_sources_and_paths', nargs='+', type=str, required=False, help="The name of the features source and the respective paths (comma separated values).")
+    parser.add_argument('--features_h5_dir', nargs='+', type=str, required=False, help="The directory of the features in .pt format for the TCGA-BRCA dataset.")
     parser.add_argument(
         '--label', 
         type=str, 
@@ -110,51 +107,16 @@ if __name__ == '__main__':
     # Load data
     print('Loading dataset...')
     if args.dataset == 'TCGA-BRCA':
-        if args.fusion_strategy:
-            
-            # Build the dictionary of feature sources and directories
-            features_dict_dir = dict()
-            for f_src_dir in args.features_sources_and_paths:
-                parsed_f_src_dir = f_src_dir.split(',')
-                f_src = parsed_f_src_dir[0]
-                f_dirs = [f for f in parsed_f_src_dir if f != f_src]
-                features_dict_dir[f_src] = f_dirs
-
             dataset_args = {
                 "base_data_path":args.base_data_path,
                 "experimental_strategy":args.experimental_strategy,
                 "setting":args.setting,
                 "label":args.label,
                 "label_thresh_metric":config_json["data"]["label_thresh_metric"],
+                "features_pt_dir":args.features_pt_dir,
                 "n_folds":int(config_json["data"]["n_folds"]),
                 "seed":int(args.seed),
-                "features_dict_dir":features_dict_dir
             }
-
-        else:
-            if args.setting in ('ordinal', 'multiclass'):
-                dataset_args = {
-                    "base_data_path":args.base_data_path,
-                    "experimental_strategy":args.experimental_strategy,
-                    "setting":args.setting,
-                    "label":args.label,
-                    "label_thresh_metric":config_json["data"]["label_thresh_metric"],
-                    "features_pt_dir":args.features_pt_dir,
-                    "n_folds":int(config_json["data"]["n_folds"]),
-                    "seed":int(args.seed),
-                    "n_bins":config_json['model']['n_classes']
-                }
-            else:
-                dataset_args = {
-                    "base_data_path":args.base_data_path,
-                    "experimental_strategy":args.experimental_strategy,
-                    "setting":args.setting,
-                    "label":args.label,
-                    "label_thresh_metric":config_json["data"]["label_thresh_metric"],
-                    "features_pt_dir":args.features_pt_dir,
-                    "n_folds":int(config_json["data"]["n_folds"]),
-                    "seed":int(args.seed),
-                }
 
 
 
@@ -172,7 +134,7 @@ if __name__ == '__main__':
             # Load WandB logger
             wandb_project_config = {
 
-                # general
+                # General
                 "comment":config_json['general']['comment'],
                 "fp16":config_json['general']['fp16'],
                 "amp_level":config_json['general']['amp_level'],
@@ -187,7 +149,7 @@ if __name__ == '__main__':
                 "encoding_size":config_json['general']['encoding_size'],
                 "features":config_json['general']['features'],
 
-                # data
+                # Data
                 "dataset_name":config_json['data']['dataset_name'],
                 "n_folds":config_json['data']['n_folds'],
                 "batch_size":config_json['data']['batch_size'],
@@ -196,7 +158,7 @@ if __name__ == '__main__':
                 "name":config_json['model']['name'],
                 "n_classes":config_json['model']['n_classes'],
 
-                # hyperparameters: optimizer
+                # Hyperparameters: optimizer
                 "opt":config_json['hyperparameters']['optimizer']['opt'],
                 "lr":config_json['hyperparameters']['optimizer']['lr'],
                 "opt_eps":config_json['hyperparameters']['optimizer']['opt_eps'],
@@ -204,7 +166,7 @@ if __name__ == '__main__':
                 "momentum":config_json['hyperparameters']['optimizer']['momentum'],
                 "weight_decay":config_json['hyperparameters']['optimizer']['weight_decay'],
 
-                # hyperparameters: loss
+                # Hyperparameters: loss
                 "base_loss":config_json['hyperparameters']['loss']['base_loss']
             }
             wandblogger = WandbLogger(
@@ -252,8 +214,6 @@ if __name__ == '__main__':
             'pin_memory':config_json['data']['pin_memory'],
             'dataset_name':config_json['data']['dataset_name'],
             'fold':fold,
-            'fusion_strategy':args.fusion_strategy if args.fusion_strategy else None,
-            "setting":args.setting,
             'dataset_args':dataset_args
         }
         datamodule = DataInterface(**DataInterface_dict)
