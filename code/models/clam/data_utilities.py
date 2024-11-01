@@ -449,3 +449,61 @@ class TCGABRCA_MIL_Dataset(Dataset):
         }
 
         return input_data_dict
+
+
+
+# Class: TCGABRCA_MIL_DatasetRegression
+class TCGABRCA_MIL_DatasetRegression(TCGABRCA_MIL_Dataset):
+
+    # Method: __init__
+    def __init__(self, base_data_path='TCGA-BRCA', experimental_strategy='All', label=None, features_h5_dir=None, train_size=0.7, val_size=0.15, test_size=0.15, n_folds=10, seed=42, transform=None):
+        super().__init__(base_data_path, experimental_strategy, label, features_h5_dir, train_size, val_size, test_size, n_folds, seed, transform)
+
+        return
+
+
+    # Method: __getitem__
+    def __getitem__(self, idx):
+
+        # Initialise dataset dictionary
+        dataset_dict = dict()
+
+        # Select the dataset dictionary
+        if self.curr_split == 'train':
+            dataset_dict = self.train_dict[self.curr_fold]
+        elif self.curr_split == 'validation':
+            dataset_dict = self.val_dict[self.curr_fold]
+        else:
+            dataset_dict = self.test_dict[self.curr_fold]
+        
+        # Get Case ID
+        case_id = dataset_dict['case_id'][idx]
+
+        # Get SVS path
+        svs_path = dataset_dict['svs_fpath'][idx]
+
+        # Get features .PT file
+        features_h5 = dataset_dict['features_h5'][idx]
+        with h5py.File(features_h5, "r") as f:
+            features = f["features"][()]
+        features = torch.from_numpy(features)
+        # print(features.shape)
+
+        # Get SSGEA scores
+        ssgea_id = dataset_dict['ssgea_id'][idx]
+        ssgsea_scores = dataset_dict['ssgsea_scores'][idx][self.ssgsea_scores_label_idx_dict[self.label]]
+        ssgsea_scores = float(ssgsea_scores)
+        ssgsea_scores_bin = 1 if ssgsea_scores > self.label_threshold else 0
+
+        # Build input dictionary
+        input_data_dict = {
+            'case_id':case_id,
+            'svs_path':svs_path,
+            'features_h5':features_h5,
+            'features':features,
+            'ssgea_id':ssgea_id,
+            'ssgsea_scores':ssgsea_scores,
+            'ssgsea_scores_bin':ssgsea_scores_bin
+        }
+
+        return input_data_dict

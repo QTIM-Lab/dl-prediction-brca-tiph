@@ -232,6 +232,113 @@ class AM_SB(nn.Module):
 
 
 
+# Class: AM_SB_Regression
+class AM_SB_Regression(nn.Module):
+
+    """
+    Args:
+        gate: whether to use gated attention network
+        size_arg: config for network size
+        dropout: whether to use dropout
+        dropout_prob: the probability of dropout (default = 0.25)
+    """
+
+
+    # Method: __init__
+    def __init__(self, gate=True, size_arg="small", dropout=False, dropout_prob=0.25, encoding_size=1024):
+        super(AM_SB, self).__init__()
+
+        # Build lists of sizes for the layers, following the rationale of the first version of CLAM
+        small = [int(encoding_size * f) for f in (1, 0.5, 0.25)]
+        big = [int(encoding_size * f) for f in (1, 0.5, 0.75)]
+        self.size_dict = {
+            "small":small,
+            "big":big
+        }
+        # self.size_dict = {
+        #     "small": [1024, 512, 256], 
+        #     "big": [1024, 512, 384]
+        # }
+        size = self.size_dict[size_arg]
+        
+
+        # Build feature extractor
+        fc = [
+            nn.Linear(size[0], size[1]), 
+            nn.ReLU()
+        ]
+        
+
+        # Dropout with probability `dropout_prob`
+        if dropout:
+            fc.append(nn.Dropout(p=dropout_prob))
+
+
+        # Attention Net
+        if gate:
+            attention_net = AttentionNetGated(
+                L=size[1], 
+                D=size[2],
+                dropout=dropout,
+                dropout_prob=dropout_prob,
+                n_classes=1
+            )
+        else:
+            attention_net = AttentionNet(
+                L = size[1],
+                D = size[2], 
+                dropout = dropout, 
+                dropout_prob=dropout_prob,
+                n_classes = 1)
+        fc.append(attention_net)
+        self.attention_net = nn.Sequential(*fc)
+        
+        
+        # Classifiers
+        self.classifier = nn.Linear(size[1], 1)
+
+
+        # Initialize model's weights
+        initialize_weights(self)
+
+        return
+
+
+    # Method: forward
+    def forward(self, h):
+
+        # Shape: b X N X K (or NxK)
+        A, h = self.attention_net(h)
+        
+        # Shape: b X K X N (or KxN)
+        A = torch.transpose(A, 2, 1)
+ 
+        # Apply Softmax over dim=2 (i.e., N) or last dimension
+        A_act = F.softmax(A, dim=2)  # softmax over N
+
+        # To use this torch.mm function, the Tensors shouldn't have a batch dimension
+        # M = torch.mm(A, h)
+        # So, we squeeze them for the right dimensional shapes
+        A_act_ = torch.squeeze(A_act, dim=1)
+        h_ = torch.squeeze(h, dim=0)
+
+        # Get features after attention
+        M = torch.mm(A_act_, h_)
+
+        # Compute the logits
+        logits = self.classifier(M)
+
+        # Create a dictionary for the model outputs
+        ouput_dict = {
+            "logits":logits,
+            "A_raw":A,
+            "features": M
+        }
+
+        return ouput_dict
+
+
+
 # Class: AM_MB
 class AM_MB(AM_SB):
     def __init__(self, gate=True, size_arg="small", dropout=False, dropout_prob=0.25, n_classes=2, encoding_size=1024):
