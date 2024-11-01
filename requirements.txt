@@ -223,7 +223,7 @@ tensorboard==2.15.1
 tensorboard-data-server==0.7.2
 terminado==0.17.1
 threadpoolctl==3.2.0
-tiatoolbox==1.4.1
+# tiatoolbox==1.4.1
 tifffile==2023.4.12
 timm==0.9.8
 # timm-ctp @ file:///autofs/homes/007/tg020/mmodal-xai-brca-path/code/mizero/assets/timm_ctp.tar
