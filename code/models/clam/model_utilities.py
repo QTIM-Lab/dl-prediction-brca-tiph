@@ -246,7 +246,7 @@ class AM_SB_Regression(nn.Module):
 
     # Method: __init__
     def __init__(self, gate=True, size_arg="small", dropout=False, dropout_prob=0.25, encoding_size=1024):
-        super(AM_SB, self).__init__()
+        super(AM_SB_Regression, self).__init__()
 
         # Build lists of sizes for the layers, following the rationale of the first version of CLAM
         small = [int(encoding_size * f) for f in (1, 0.5, 0.25)]
