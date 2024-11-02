@@ -5,6 +5,7 @@ import numpy as np
 # PyTorch Imports
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchinfo import summary
@@ -390,10 +391,11 @@ def train_loop_clam(epoch, model, loader, optimizer, n_classes, task_type, loss_
             output_dict = model(features)
             logits = output_dict['logits']
             y_pred = torch.where(logits > 0, 1.0, 0.0)
+            y_pred_proba = F.sigmoid(logits)
             train_y_pred.extend(list(y_pred.squeeze(0).cpu().detach().numpy()))
             train_y.extend(list(ssgsea_scores_bin.cpu().detach().numpy()))
+            train_y_pred_proba.extend(list(y_pred_proba.squeeze(0).cpu().detach().numpy()))
             loss = loss_fn(logits.squeeze(0), ssgsea_scores.float())
-
         
         # Get loss values and update records
         loss_value = loss.item()
@@ -418,6 +420,7 @@ def train_loop_clam(epoch, model, loader, optimizer, n_classes, task_type, loss_
     # Compute metrics
     train_y_pred = torch.from_numpy(np.array(train_y_pred))
     train_y = torch.from_numpy(np.array(train_y))
+    train_y_pred_proba = torch.from_numpy(np.array(train_y_pred_proba))
 
     if n_classes == 2:
         acc = accuracy(
@@ -444,13 +447,11 @@ def train_loop_clam(epoch, model, loader, optimizer, n_classes, task_type, loss_
             task='binary'
         )
 
-
-        # TODO: Review this in the meantime, it applies to the classification but not to regression
-        # auc = auroc(
-        #     preds=y_pred_proba,
-        #     target=y,
-        #     task='binary'
-        # )
+        auc = auroc(
+            preds=train_y_pred_proba,
+            target=train_y,
+            task='binary'
+        )
 
     else:
         pass
@@ -464,8 +465,8 @@ def train_loop_clam(epoch, model, loader, optimizer, n_classes, task_type, loss_
             "train_acc":acc,
             "train_f1":f1,
             "train_rec":rec,
-            "train_prec":prec
-            # "train_auc":auc
+            "train_prec":prec,
+            "train_auc":auc
         }
     )
 
@@ -503,8 +504,10 @@ def validate_loop_clam(model, loader, n_classes, task_type, tracking_params, los
                 output_dict = model(features)
                 logits = output_dict['logits']
                 y_pred = torch.where(logits > 0, 1.0, 0.0)
+                y_pred_proba = F.sigmoid(logits)
                 val_y_pred.extend(list(y_pred.squeeze(0).cpu().detach().numpy()))
                 val_y.extend(list(ssgsea_scores_bin.cpu().detach().numpy()))
+                val_y_pred_proba.extend(list(y_pred_proba.squeeze(0).cpu().detach().numpy()))
                 loss = loss_fn(logits.squeeze(0), ssgsea_scores.float())
 
             loss_value = loss.item()
@@ -520,6 +523,7 @@ def validate_loop_clam(model, loader, n_classes, task_type, tracking_params, los
     # Compute metrics
     val_y_pred = torch.from_numpy(np.array(val_y_pred))
     val_y = torch.from_numpy(np.array(val_y))
+    val_y_pred_proba = torch.from_numpy(np.array(val_y_pred_proba))
 
     if n_classes == 2:
         acc = accuracy(
@@ -546,13 +550,11 @@ def validate_loop_clam(model, loader, n_classes, task_type, tracking_params, los
             task='binary'
         )
 
-
-        # TODO: Review this in the meantime, it applies to the classification but not to regression
-        # auc = auroc(
-        #     preds=val_y_pred_proba,
-        #     target=val_y,
-        #     task='binary'
-        # )
+        auc = auroc(
+            preds=val_y_pred_proba,
+            target=val_y,
+            task='binary'
+        )
 
     else:
         pass
@@ -565,8 +567,8 @@ def validate_loop_clam(model, loader, n_classes, task_type, tracking_params, los
             "val_acc":acc,
             "val_f1":f1,
             "val_rec":rec,
-            "val_prec":prec
-            # "val_auc":auc
+            "val_prec":prec,
+            "val_auc":auc
         }
     )
 
