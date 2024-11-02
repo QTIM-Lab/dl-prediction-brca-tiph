@@ -386,6 +386,7 @@ def train_loop_clam(epoch, model, loader, optimizer, n_classes, task_type, loss_
 
         elif task_type == "regression":
             features, ssgsea_scores, ssgsea_scores_bin = input_data_dict["features"].to(device), input_data_dict["ssgsea_scores"].to(device), input_data_dict["ssgsea_scores_bin"].to(device)
+            output_dict = model(features)
             logits = output_dict['logits']
             y_pred = torch.where(logits > 0, 1.0, 0.0)
             train_y_pred.extend(list(y_pred.cpu().detach().numpy()))
@@ -498,6 +499,7 @@ def validate_loop_clam(model, loader, n_classes, task_type, tracking_params, los
 
             elif task_type == "regression":
                 features, ssgsea_scores, ssgsea_scores_bin = input_data_dict["features"].to(device), input_data_dict["ssgsea_scores"].to(device), input_data_dict["ssgsea_scores_bin"].to(device)
+                output_dict = model(features)
                 logits = output_dict['logits']
                 y_pred = torch.where(logits > 0, 1.0, 0.0)
                 val_y_pred.extend(list(y_pred.cpu().detach().numpy()))
