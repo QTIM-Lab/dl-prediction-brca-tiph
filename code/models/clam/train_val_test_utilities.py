@@ -503,7 +503,7 @@ def validate_loop_clam(model, loader, n_classes, task_type, tracking_params, los
                 output_dict = model(features)
                 logits = output_dict['logits']
                 y_pred = torch.where(logits > 0, 1.0, 0.0)
-                val_y_pred.extend(list(y_pred.cpu().detach().numpy()))
+                val_y_pred.extend(list(y_pred.squeeze(0).cpu().detach().numpy()))
                 val_y.extend(list(ssgsea_scores_bin.cpu().detach().numpy()))
                 loss = loss_fn(logits.squeeze(0), ssgsea_scores.float())
 
