@@ -131,7 +131,7 @@ if __name__ == "__main__":
                 seed=int(args.seed)
             )
         elif task_type == "regression":
-            task_type = TCGABRCA_MIL_DatasetRegression(
+            dataset = TCGABRCA_MIL_DatasetRegression(
                 base_data_path=args.base_data_path,
                     experimental_strategy=args.experimental_strategy,
                     label=args.label,
