@@ -390,7 +390,9 @@ def train_loop_clam(epoch, model, loader, optimizer, n_classes, task_type, loss_
             output_dict = model(features)
             logits = output_dict['logits']
             y_pred = torch.where(logits > 0, 1.0, 0.0)
+            print(y_pred.shape)
             train_y_pred.extend(list(y_pred.cpu().detach().numpy()))
+            print(ssgsea_scores_bin.shape)
             train_y.extend(list(ssgsea_scores_bin.cpu().detach().numpy()))
             loss = loss_fn(logits.squeeze(0), ssgsea_scores.float())
 
