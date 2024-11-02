@@ -393,8 +393,9 @@ def train_loop_clam(epoch, model, loader, optimizer, n_classes, task_type, loss_
             train_y.extend(list(ssgsea_scores_bin.cpu().detach().numpy()))
 
         # Compute train loss
-        print(logits.shape, logits.type(), ssgsea_scores.shape, ssgsea_scores.type())
-        loss = loss_fn(logits, ssgsea_scores)
+        print(logits.squeeze(0).shape, logits.type(), ssgsea_scores.shape, ssgsea_scores.type())
+        loss = loss_fn(logits, ssgsea_scores.float())
+        exit()
 
         # Get loss values and update records
         loss_value = loss.item()
