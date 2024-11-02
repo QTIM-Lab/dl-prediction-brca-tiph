@@ -164,3 +164,6 @@ cython_debug/
 wandb/
 *.err
 *.out
+
+# Directories
+organise/
