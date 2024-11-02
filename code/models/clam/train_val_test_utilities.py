@@ -421,25 +421,25 @@ def train_loop_clam(epoch, model, loader, optimizer, n_classes, task_type, loss_
 
     if n_classes == 2:
         acc = accuracy(
-            preds=y_pred,
+            preds=train_y_pred,
             target=train_y,
             task='binary'
         )
 
         f1 = f1_score(
-            preds=y_pred,
+            preds=train_y_pred,
             target=train_y,
             task='binary'
         )
 
         rec = recall(
-            preds=y_pred,
+            preds=train_y_pred,
             target=train_y,
             task='binary'
         )
 
         prec = precision(
-            preds=y_pred,
+            preds=train_y_pred,
             target=train_y,
             task='binary'
         )
