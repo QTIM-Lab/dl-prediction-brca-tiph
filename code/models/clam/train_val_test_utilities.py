@@ -383,6 +383,7 @@ def train_loop_clam(epoch, model, loader, optimizer, n_classes, task_type, loss_
             logits, y_pred = output_dict['logits'], output_dict['y_pred']
             train_y_pred.extend(list(y_pred.cpu().detach().numpy()))
             train_y.extend(list(ssgsea_scores.cpu().detach().numpy()))
+            loss = loss_fn(logits, ssgsea_scores)
 
         elif task_type == "regression":
             features, ssgsea_scores, ssgsea_scores_bin = input_data_dict["features"].to(device), input_data_dict["ssgsea_scores"].to(device), input_data_dict["ssgsea_scores_bin"].to(device)
@@ -391,12 +392,9 @@ def train_loop_clam(epoch, model, loader, optimizer, n_classes, task_type, loss_
             y_pred = torch.where(logits > 0, 1.0, 0.0)
             train_y_pred.extend(list(y_pred.cpu().detach().numpy()))
             train_y.extend(list(ssgsea_scores_bin.cpu().detach().numpy()))
+            loss = loss_fn(logits.squeeze(0), ssgsea_scores.float())
 
-        # Compute train loss
-        print(logits.squeeze(0).shape, logits.type(), ssgsea_scores.shape, ssgsea_scores.type())
-        loss = loss_fn(logits, ssgsea_scores.float())
-        exit()
-
+        
         # Get loss values and update records
         loss_value = loss.item()
         train_loss += loss_value
@@ -498,6 +496,7 @@ def validate_loop_clam(model, loader, n_classes, task_type, tracking_params, los
                 val_y_pred.extend(list(y_pred.cpu().detach().numpy()))
                 val_y.extend(list(ssgsea_scores.cpu().detach().numpy()))
                 # val_y_pred_proba.extend(list(y_pred_proba.cpu().detach().numpy()))
+                loss = loss_fn(logits, ssgsea_scores)
 
             elif task_type == "regression":
                 features, ssgsea_scores, ssgsea_scores_bin = input_data_dict["features"].to(device), input_data_dict["ssgsea_scores"].to(device), input_data_dict["ssgsea_scores_bin"].to(device)
@@ -506,10 +505,8 @@ def validate_loop_clam(model, loader, n_classes, task_type, tracking_params, los
                 y_pred = torch.where(logits > 0, 1.0, 0.0)
                 val_y_pred.extend(list(y_pred.cpu().detach().numpy()))
                 val_y.extend(list(ssgsea_scores_bin.cpu().detach().numpy()))
+                loss = loss_fn(logits.squeeze(0), ssgsea_scores.float())
 
-
-            # Compute validation loss
-            loss = loss_fn(logits, ssgsea_scores)
             loss_value = loss.item()
             val_loss += loss_value
 
