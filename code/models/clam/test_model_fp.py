@@ -86,7 +86,7 @@ if __name__ == "__main__":
             dataset = TCGABRCA_MIL_Dataset(
                 base_data_path=args.base_data_path,
                 experimental_strategy=args.experimental_strategy,
-                label=args.label,
+                label=args.checkpoint_dir.split('/')[-2],
                 features_h5_dir=args.features_h5_dir,
                 n_folds=int(config_json["data"]["n_folds"]),
                 seed=int(args.seed)
@@ -95,7 +95,7 @@ if __name__ == "__main__":
             dataset = TCGABRCA_MIL_DatasetRegression(
                 base_data_path=args.base_data_path,
                     experimental_strategy=args.experimental_strategy,
-                    label=args.label,
+                    label=args.checkpoint_dir.split('/')[-2],
                     features_h5_dir=args.features_h5_dir,
                     n_folds=int(config_json["data"]["n_folds"]),
                     seed=int(args.seed)
