@@ -361,11 +361,11 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
 
 
     # Append test AUC to the test metrics
-    test_metrics["acc"] = acc
-    test_metrics["f1"] = f1
-    test_metrics["rec"] = rec
-    test_metrics["prec"] = prec
-    test_metrics["auc"] = auc
+    test_metrics["acc"] = [acc.item()]
+    test_metrics["f1"] = [f1.item()]
+    test_metrics["rec"] = [rec.item()]
+    test_metrics["prec"] = [prec.item()]
+    test_metrics["auc"] = [auc.item()]
 
     return test_metrics
 
