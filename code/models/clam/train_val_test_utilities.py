@@ -228,33 +228,49 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
     model_size = config_json["hyperparameters"]["model_size"]
     model_type = config_json["hyperparameters"]["model_type"]
     verbose = config_json["verbose"]
+    optimizer = config_json["hyperparameters"]["optimizer"]
+    lr = config_json["hyperparameters"]["lr"]
+    weight_decay = config_json["hyperparameters"]["weight_decay"]
     num_workers = config_json["data"]["num_workers"]
     pin_memory = config_json["data"]["pin_memory"]
+    epochs = config_json["hyperparameters"]["epochs"]
+    early_stopping = config_json["hyperparameters"]["early_stopping"]
+    loss = config_json["hyperparameters"]["loss"]
     encoding_size = config_json['data']['encoding_size']
     features_ = config_json["features"]
+    task_type = config_json["task_type"]
 
 
     # Dictionary with model settings for the initialization of the model object
-    model_dict = {
-        "dropout":dropout,
-        "dropout_prob":dropout_prob,
-        'n_classes':n_classes,
-        "encoding_size":encoding_size
-    }
+    if task_type == "classification":
+        model_dict = {
+            "dropout":dropout,
+            "dropout_prob":dropout_prob,
+            'n_classes':n_classes,
+            "encoding_size":encoding_size
+        }
+    elif task_type == "regression":
+        model_dict = {
+            "dropout":dropout,
+            "dropout_prob":dropout_prob,
+            "encoding_size":encoding_size
+        }
     
 
     # Adapted from the CLAM framework
     assert model_size is not None, "Please define a model size."
     
     model_dict.update({"size_arg": model_size})
-
-    if model_type == 'am_sb':
-        model = AM_SB(**model_dict)
-    elif model_type == 'am_mb':
-        model = AM_MB(**model_dict)
-
-    # Move into model into device
-    model.to(device=device)
+    
+    # AM-SB
+    if task_type == "classification":
+        if model_type == 'am_sb':
+            model = AM_SB(**model_dict)
+        elif model_type == 'am_mb':
+            model = AM_MB(**model_dict)
+    elif task_type == "regression":
+        if model_type == 'am_sb':
+            model = AM_SB_Regression(**model_dict)
 
     if verbose:
         print(f"Using features: {features_}")
@@ -278,86 +294,85 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
     # Put model into evaluation 
     model.eval()
 
-    # Data dictionary to log step accuracies
-    data = [{"count": 0, "correct": 0} for _ in range(n_classes)]
     
     # Initialize variables to track values
-    test_error = 0.
     test_y_pred = list()
-    test_y_pred_prob = list()
+    test_y_pred_proba = list()
     test_y = list()
 
     # Create a dictionary for test metrics
     test_metrics = dict()
 
 
-    # Go through data batches and get metric values
-    with torch.no_grad():
-        for _, input_data_dict in enumerate(test_loader):
-            features, ssgea_scores = input_data_dict['features'].to(device), input_data_dict['ssgsea_scores'].to(device)
+    # Initialize variables 
+    test_y_pred = list()
+    test_y_pred_proba = list()
+    test_y = list()
+
+    # Get batch of data
+    for _, input_data_dict in enumerate(test_loader):
+
+        if task_type == "classification":
+            features, ssgsea_scores = input_data_dict['features'].to(device), input_data_dict['ssgsea_scores'].to(device)
             output_dict = model(features)
-            logits, y_pred_prob, y_pred = output_dict['logits'], output_dict['y_proba'], output_dict['y_pred'], 
-            
-            # Log step counts and correct counts
-            data[int(ssgea_scores)]["count"] += 1
-            data[int(ssgea_scores)]["correct"] += (int(y_pred) == int(ssgea_scores))
-
-            # Append predictions and labels into the corresponding lists
+            logits, y_pred = output_dict['logits'], output_dict['y_pred']
             test_y_pred.extend(list(y_pred.cpu().detach().numpy()))
-            test_y.extend(list(ssgea_scores.cpu().detach().numpy()))
+            test_y.extend(list(ssgsea_scores.cpu().detach().numpy()))
 
-            # Updated list of y_pred probabilities
-            test_y_pred_prob.append(y_pred_prob.cpu().numpy())
-
-            # Compute error and update it
-            error = compute_prediction_error(y_pred=y_pred, y=ssgea_scores)
-            test_error += error
-
-
-    # Updated final validation error
-    test_error /= len(test_loader)
-
-    # Append test error to the metrics
-    test_metrics["test_error"] = [test_error]
+        elif task_type == "regression":
+            features, ssgsea_scores, ssgsea_scores_bin = input_data_dict["features"].to(device), input_data_dict["ssgsea_scores"].to(device), input_data_dict["ssgsea_scores_bin"].to(device)
+            output_dict = model(features)
+            logits = output_dict['logits']
+            y_pred = torch.where(logits > 0, 1.0, 0.0)
+            y_pred_proba = F.sigmoid(logits)
+            test_y_pred.extend(list(y_pred.squeeze(0).cpu().detach().numpy()))
+            test_y.extend(list(ssgsea_scores_bin.cpu().detach().numpy()))
+            test_y_pred_proba.extend(list(y_pred_proba.squeeze(0).cpu().detach().numpy()))
 
 
-    # Compute Validation ROC AUC
+    # Compute metrics
+    train_y_pred = torch.from_numpy(np.array(train_y_pred))
+    train_y = torch.from_numpy(np.array(train_y))
+    train_y_pred_proba = torch.from_numpy(np.array(train_y_pred_proba))
+
     if n_classes == 2:
+        acc = accuracy(
+            preds=train_y_pred,
+            target=train_y,
+            task='binary'
+        )
 
-        # Convert lists to NumPy arrays and fix their shape(s)
-        test_y = np.array(test_y)
-        test_y_pred_prob = np.squeeze(np.array(test_y_pred_prob), axis=1)
+        f1 = f1_score(
+            preds=train_y_pred,
+            target=train_y,
+            task='binary'
+        )
 
-        # Compute the ROC AUC Score
-        test_auc = roc_auc_score(test_y, test_y_pred_prob[:, 1])
-        test_aucs = []
-    
-    else:
-        test_aucs = []
-        binary_labels = label_binarize(test_y, classes=[i for i in range(n_classes)])
-        for class_idx in range(n_classes):
-            if class_idx in test_y:
-                fpr, tpr, _ = roc_curve(binary_labels[:, class_idx], test_y_pred_prob[:, class_idx])
-                test_aucs.append(auc(fpr, tpr))
-            else:
-                test_aucs.append(float('nan'))
+        rec = recall(
+            preds=train_y_pred,
+            target=train_y,
+            task='binary'
+        )
 
-        test_auc = np.nanmean(np.array(test_aucs))
-    
+        prec = precision(
+            preds=train_y_pred,
+            target=train_y,
+            task='binary'
+        )
+
+        auc = auroc(
+            preds=train_y_pred_proba,
+            target=train_y,
+            task='binary'
+        )
+
 
     # Append test AUC to the test metrics
-    test_metrics["test_auc"] = [test_auc]
-
-    # Compute overall accuracy
-    test_acc = accuracy_score(y_true=test_y, y_pred=test_y_pred)
-    test_metrics["test_acc"] = [test_acc]
-
-
-    # Compute class accuracies
-    acc_dict, _, _ = compute_class_acc(data=data, n_classes=n_classes)
-    for c in range(n_classes):
-        test_metrics[f"test_class_{c}_acc"] = [acc_dict[c]]
-
+    test_metrics["acc"] = acc
+    test_metrics["f1"] = f1
+    test_metrics["rec"] = rec
+    test_metrics["prec"] = prec
+    test_metrics["auc"] = auc
 
     return test_metrics
 

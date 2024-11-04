@@ -47,4 +47,4 @@ do
 done
 
 
- echo 'Finished AM-SB (Regression) Training on TCGA-BRCA Database.'
+echo 'Finished AM-SB (Regression) Training on TCGA-BRCA Database.'

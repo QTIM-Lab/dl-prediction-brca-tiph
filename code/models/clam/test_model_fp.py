@@ -13,7 +13,7 @@ import torch
 
 # Project Imports
 from train_val_test_utilities import test_pipeline
-from data_utilities import TCGABRCA_MIL_Dataset
+from data_utilities import TCGABRCA_MIL_Dataset, TCGABRCA_MIL_DatasetRegression
 
 
 
@@ -75,18 +75,31 @@ if __name__ == "__main__":
     # Get verbose
     verbose = config_json['verbose']
 
+    # Task type
+    task_type = config_json["task_type"]
+
 
     # Load data
     print('Loading dataset...')
     if args.dataset == 'TCGA-BRCA':
-        dataset = TCGABRCA_MIL_Dataset(
-            base_data_path=args.base_data_path,
-            experimental_strategy=args.experimental_strategy,
-            label=args.checkpoint_dir.split('/')[-2],
-            features_h5_dir=args.features_h5_dir,
-            n_folds=int(config_json["data"]["n_folds"]),
-            seed=int(args.seed)
-        )
+        if task_type == "classification":
+            dataset = TCGABRCA_MIL_Dataset(
+                base_data_path=args.base_data_path,
+                experimental_strategy=args.experimental_strategy,
+                label=args.label,
+                features_h5_dir=args.features_h5_dir,
+                n_folds=int(config_json["data"]["n_folds"]),
+                seed=int(args.seed)
+            )
+        elif task_type == "regression":
+            dataset = TCGABRCA_MIL_DatasetRegression(
+                base_data_path=args.base_data_path,
+                    experimental_strategy=args.experimental_strategy,
+                    label=args.label,
+                    features_h5_dir=args.features_h5_dir,
+                    n_folds=int(config_json["data"]["n_folds"]),
+                    seed=int(args.seed)
+            )
 
         # Create the data splits from the original dataset
         train_set = copy.deepcopy(dataset)
