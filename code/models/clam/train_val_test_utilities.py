@@ -228,14 +228,8 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
     model_size = config_json["hyperparameters"]["model_size"]
     model_type = config_json["hyperparameters"]["model_type"]
     verbose = config_json["verbose"]
-    optimizer = config_json["hyperparameters"]["optimizer"]
-    lr = config_json["hyperparameters"]["lr"]
-    weight_decay = config_json["hyperparameters"]["weight_decay"]
     num_workers = config_json["data"]["num_workers"]
     pin_memory = config_json["data"]["pin_memory"]
-    epochs = config_json["hyperparameters"]["epochs"]
-    early_stopping = config_json["hyperparameters"]["early_stopping"]
-    loss = config_json["hyperparameters"]["loss"]
     encoding_size = config_json['data']['encoding_size']
     features_ = config_json["features"]
     task_type = config_json["task_type"]
@@ -289,12 +283,11 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
 
     # Load model checkpoint
     model.load_state_dict(torch.load(os.path.join(checkpoint_dir, f"best_model_kf{fold}.pt"), map_location=device))
-    
+    model.to(device)
 
     # Put model into evaluation 
     model.eval()
 
-    
     # Initialize variables to track values
     test_y_pred = list()
     test_y_pred_proba = list()
@@ -331,38 +324,38 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
 
 
     # Compute metrics
-    train_y_pred = torch.from_numpy(np.array(train_y_pred))
-    train_y = torch.from_numpy(np.array(train_y))
-    train_y_pred_proba = torch.from_numpy(np.array(train_y_pred_proba))
+    test_y_pred = torch.from_numpy(np.array(test_y_pred))
+    test_y = torch.from_numpy(np.array(test_y))
+    test_y_pred_proba = torch.from_numpy(np.array(test_y_pred_proba))
 
     if n_classes == 2:
         acc = accuracy(
-            preds=train_y_pred,
-            target=train_y,
+            preds=test_y_pred,
+            target=test_y,
             task='binary'
         )
 
         f1 = f1_score(
-            preds=train_y_pred,
-            target=train_y,
+            preds=test_y_pred,
+            target=test_y,
             task='binary'
         )
 
         rec = recall(
-            preds=train_y_pred,
-            target=train_y,
+            preds=test_y_pred,
+            target=test_y,
             task='binary'
         )
 
         prec = precision(
-            preds=train_y_pred,
-            target=train_y,
+            preds=test_y_pred,
+            target=test_y,
             task='binary'
         )
 
         auc = auroc(
-            preds=train_y_pred_proba,
-            target=train_y,
+            preds=test_y_pred_proba,
+            target=test_y,
             task='binary'
         )
 
