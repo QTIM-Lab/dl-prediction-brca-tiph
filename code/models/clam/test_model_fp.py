@@ -141,3 +141,4 @@ if __name__ == "__main__":
         # Convert test metrics into a dataframe
         test_metrics_df = pd.DataFrame.from_dict(test_metrics)
         test_metrics_df.to_csv(os.path.join(args.checkpoint_dir, f"test_metrics_kf{fold}.csv"))
+        print(test_metrics_df)
