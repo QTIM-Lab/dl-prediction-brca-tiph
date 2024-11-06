@@ -9,7 +9,7 @@ export CUDA_VISIBLE_DEVICES=GPU-a6f9db4e-0b70-8386-34d7-46f9a00b32e9
 
 
 
-echo 'Started AM-SB (Regression) Training on TCGA-BRCA Database.'
+echo 'Started AM-SB (Clinical Subtype) Training on TCGA-BRCA Database.'
 
 
 
@@ -26,4 +26,4 @@ python code/models/clam/train_val_model_fp.py \
 
 
 
-echo 'Finished AM-SB (Regression) Training on TCGA-BRCA Database.'
+echo 'Finished AM-SB (Clinical Subtype) Training on TCGA-BRCA Database.'

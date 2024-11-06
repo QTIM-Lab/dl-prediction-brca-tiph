@@ -107,7 +107,7 @@ def train_val_pipeline(datasets, config_json, device, experiment_dir, checkpoint
 
 
     # Dictionary with model settings for the initialization of the model object
-    if task_type == "classification":
+    if task_type in ("classification", "clinical_subtype_classification"):
         model_dict = {
             "dropout":dropout,
             "dropout_prob":dropout_prob,
