@@ -13,7 +13,7 @@ import torch
 
 # Project Imports
 from train_val_test_utilities import test_pipeline
-from data_utilities import TCGABRCA_MIL_Dataset, TCGABRCA_MIL_DatasetRegression
+from data_utilities import TCGABRCA_MIL_Dataset, TCGABRCA_MIL_DatasetRegression, TCGABRCA_MIL_DatasetClinicalSubtype
 
 
 
@@ -78,7 +78,7 @@ if __name__ == "__main__":
     # Task type
     task_type = config_json["task_type"]
 
-
+    
     # Load data
     print('Loading dataset...')
     if args.dataset == 'TCGA-BRCA':
@@ -87,6 +87,14 @@ if __name__ == "__main__":
                 base_data_path=args.base_data_path,
                 experimental_strategy=args.experimental_strategy,
                 label=args.checkpoint_dir.split('/')[-2],
+                features_h5_dir=args.features_h5_dir,
+                n_folds=int(config_json["data"]["n_folds"]),
+                seed=int(args.seed)
+            )
+        elif task_type == "clinical_subtype_classification":
+            dataset = TCGABRCA_MIL_DatasetClinicalSubtype(
+                base_data_path=args.base_data_path,
+                experimental_strategy=args.experimental_strategy,
                 features_h5_dir=args.features_h5_dir,
                 n_folds=int(config_json["data"]["n_folds"]),
                 seed=int(args.seed)

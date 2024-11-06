@@ -234,7 +234,7 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
 
 
     # Dictionary with model settings for the initialization of the model object
-    if task_type == "classification":
+    if task_type in ("classification", "clinical_subtype_classification"):
         model_dict = {
             "dropout":dropout,
             "dropout_prob":dropout_prob,
@@ -255,7 +255,7 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
     model_dict.update({"size_arg": model_size})
     
     # AM-SB
-    if task_type == "classification":
+    if task_type in ("classification", "clinical_subtype_classification"):
         if model_type == 'am_sb':
             model = AM_SB(**model_dict)
         elif model_type == 'am_mb':
@@ -309,6 +309,14 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
             logits, y_pred = output_dict['logits'], output_dict['y_pred']
             test_y_pred.extend(list(y_pred.cpu().detach().numpy()))
             test_y.extend(list(ssgsea_scores.cpu().detach().numpy()))
+        
+        elif task_type == "clinical_subtype_classification":
+            features, c_subtypes = input_data_dict['features'].to(device), input_data_dict['c_subtype_label'].to(device)
+            output_dict = model(features)
+            logits, y_pred, y_proba = output_dict['logits'], output_dict['y_pred'], output_dict['y_proba']
+            test_y_pred.extend(list(y_pred.cpu().detach().numpy()))
+            test_y.extend(list(c_subtypes.cpu().detach().numpy()))
+            test_y_pred_proba.extend(list(y_proba.cpu().detach().numpy()))
 
         elif task_type == "regression":
             features, ssgsea_scores, ssgsea_scores_bin = input_data_dict["features"].to(device), input_data_dict["ssgsea_scores"].to(device), input_data_dict["ssgsea_scores_bin"].to(device)
@@ -355,6 +363,42 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
             preds=test_y_pred_proba,
             target=test_y,
             task='binary'
+        )
+
+    else:
+        acc = accuracy(
+            preds=test_y_pred,
+            target=test_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
+
+        f1 = f1_score(
+            preds=test_y_pred,
+            target=test_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
+
+        rec = recall(
+            preds=test_y_pred,
+            target=test_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
+
+        prec = precision(
+            preds=test_y_pred,
+            target=test_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
+
+        auc = auroc(
+            preds=test_y_pred_proba,
+            target=test_y,
+            task='multiclass',
+            num_classes=n_classes
         )
 
 
@@ -547,7 +591,7 @@ def validate_loop_clam(model, loader, n_classes, task_type, tracking_params, los
                 val_y.extend(list(ssgsea_scores.cpu().detach().numpy()))
                 val_y_pred_proba.extend(list(y_proba.cpu().detach().numpy()))
                 loss = loss_fn(logits, ssgsea_scores)
-            
+
             elif task_type == "clinical_subtype_classification":
                 features, c_subtypes = input_data_dict['features'].to(device), input_data_dict['c_subtype_label'].to(device)
                 output_dict = model(features)
