@@ -716,6 +716,8 @@ class TCGABRCA_MIL_DatasetClinicalSubtype(Dataset):
 
         for _, r in tcga_brca_labels.iterrows():
             clid = self.get_case_id(r['CLID'])
+            if clid not in tcga_brca_labels_dict.keys():
+                tcga_brca_labels_dict[clid] = dict()
             er = r['er_status_by_ihc']
             pr = r['pr_status_by_ihc']
             her2 = r['HER2.newly.derived']
