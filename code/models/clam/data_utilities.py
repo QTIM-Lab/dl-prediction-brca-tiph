@@ -717,14 +717,13 @@ class TCGABRCA_MIL_DatasetClinicalSubtype(Dataset):
 
         for _, r in tcga_brca_labels.iterrows():
             clid = self.get_case_id(r['CLID'])
-            if clid not in tcga_brca_labels_dict.keys():
-                tcga_brca_labels_dict[clid] = dict()
             er = r['er_status_by_ihc']
             pr = r['pr_status_by_ihc']
             her2 = r['HER2.newly.derived']
             c_subtype, c_subtype_label = self.compute_clinical_subtype(er, pr, her2)
-            # print(clid, er, pr, her2, c_subtype)
             if c_subtype is not None:
+                if clid not in tcga_brca_labels_dict.keys():
+                    tcga_brca_labels_dict[clid] = dict()
                 tcga_brca_labels_dict[clid]["c_subtype"] = c_subtype
                 tcga_brca_labels_dict[clid]["c_subtype_label"] = c_subtype_label
                 tcga_brca_labels_dict[clid]["er"] = er
