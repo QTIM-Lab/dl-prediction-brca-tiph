@@ -396,7 +396,7 @@ def train_loop_clam(epoch, model, loader, optimizer, n_classes, task_type, loss_
         elif task_type == "clinical_subtype_classification":
             features, c_subtypes = input_data_dict['features'].to(device), input_data_dict['c_subtype_label'].to(device)
             output_dict = model(features)
-            logits, y_pred = output_dict['logits'], output_dict['y_pred'], output_dict['y_proba']
+            logits, y_pred, y_proba = output_dict['logits'], output_dict['y_pred'], output_dict['y_proba']
             train_y_pred.extend(list(y_pred.cpu().detach().numpy()))
             train_y.extend(list(c_subtypes.cpu().detach().numpy()))
             train_y_pred_proba.extend(list(y_proba.cpu().detach().numpy()))
@@ -551,7 +551,7 @@ def validate_loop_clam(model, loader, n_classes, task_type, tracking_params, los
             elif task_type == "clinical_subtype_classification":
                 features, c_subtypes = input_data_dict['features'].to(device), input_data_dict['c_subtype_label'].to(device)
                 output_dict = model(features)
-                logits, y_pred = output_dict['logits'], output_dict['y_pred'], output_dict['y_proba']
+                logits, y_pred, y_proba = output_dict['logits'], output_dict['y_pred'], output_dict['y_proba']
                 val_y_pred.extend(list(y_pred.cpu().detach().numpy()))
                 val_y.extend(list(c_subtypes.cpu().detach().numpy()))
                 val_y_pred_proba.extend(list(y_proba.cpu().detach().numpy()))
