@@ -592,6 +592,7 @@ class TCGABRCA_MIL_DatasetClinicalSubtype(Dataset):
 
         # Get the Clinical Subtype
         self.tcga_brca_labels_dict = self.load_tcga_brca_labels()
+        print(self.tcga_brca_labels_dict)
         tcga_brca_label_idx_dict = {
             "HER2+/HR+":0,
             "HER2+/HR-":1,
