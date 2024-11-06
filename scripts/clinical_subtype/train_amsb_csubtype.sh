@@ -1,11 +1,22 @@
 #!/bin/bash
+#SBATCH --account=qtim
+#SBATCH --partition=rtx6000,rtx8000
+#SBATCH --gpus=1
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=15
+#SBATCH --mem=120G
+#SBATCH --time=7-00:00:00
+#SBATCH --job-name=train_amsb_csubtype         # Job name
+#SBATCH -o train_amsb_csubtype.out             # STDOUT
+#SBATCH -e train_amsb_csubtype.err             # STDERR
+#SBATCH -M all
+#SBATCH --mail-type=ALL
 
 
 
-# Environment Variables
 export PYENV_VERSION=mmxbrcp
 export LD_LIBRARY_PATH="/autofs/space/crater_001/tools/usr/lib64:${LD_LIBRARY_PATH}"
-export CUDA_VISIBLE_DEVICES=GPU-a6f9db4e-0b70-8386-34d7-46f9a00b32e9
 
 
 
