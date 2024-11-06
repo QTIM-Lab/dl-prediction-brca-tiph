@@ -1035,7 +1035,7 @@ class TCGABRCA_MIL_DatasetClinicalSubtype(Dataset):
             ssgsea_scores = float(ssgsea_scores)
             ssgsea_scores = 1 if ssgsea_scores > self.label_threshold else 0
         else:
-            ssgsea_scores = None
+            ssgsea_scores = -1
         
         # Get Clinical Subtype and Clinical Subtype Label
         c_subtype = dataset_dict['c_subtype'][idx]
@@ -1054,22 +1054,3 @@ class TCGABRCA_MIL_DatasetClinicalSubtype(Dataset):
         }
 
         return input_data_dict
-
-
-
-if __name__ == "__main__":
-    d = TCGABRCA_MIL_DatasetClinicalSubtype(
-        base_data_path='/autofs/space/crater_001/datasets/public/TCGA-BRCA', 
-        experimental_strategy='All', 
-        label=None, 
-        features_h5_dir=['/autofs/space/crater_001/projects/breast-cancer-pathology/results/CONCH/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features', '/autofs/space/crater_001/projects/breast-cancer-pathology/results/CONCH/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features'], 
-        train_size=0.70, 
-        val_size=0.15, 
-        test_size=0.15, 
-        n_folds=10, 
-        seed=42, 
-        transform=None
-    )
-
-    for idx in range(len(d)):
-        print(d.__getitem__(idx))
