@@ -857,8 +857,8 @@ class TCGABRCA_MIL_DatasetClinicalSubtype(Dataset):
                             dataset_dict['features_h5'].append(feature_h5_fname)
                             dataset_dict['ssgea_id'].append(ssgea)
                             dataset_dict['ssgsea_scores'].append(self.ssgsea_scores_dict[ssgea])
-                            dataset_dict['c_subtype'].append(self.tcga_brca_labels_dict['c_subtype'])
-                            dataset_dict['c_subtype_label'].append(self.tcga_brca_labels_dict['c_subtype_label'])
+                            dataset_dict['c_subtype'].append(self.tcga_brca_labels_dict[case_id]['c_subtype'])
+                            dataset_dict['c_subtype_label'].append(self.tcga_brca_labels_dict[case_id]['c_subtype_label'])
 
 
         # Ensure quality of the database
