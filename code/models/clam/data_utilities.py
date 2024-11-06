@@ -592,7 +592,7 @@ class TCGABRCA_MIL_DatasetClinicalSubtype(Dataset):
 
         # Get the Clinical Subtype
         self.tcga_brca_labels_dict = self.load_tcga_brca_labels()
-        print(self.tcga_brca_labels_dict)
+        # print(self.tcga_brca_labels_dict)
         tcga_brca_label_idx_dict = {
             "HER2+/HR+":0,
             "HER2+/HR-":1,
@@ -858,6 +858,7 @@ class TCGABRCA_MIL_DatasetClinicalSubtype(Dataset):
                             dataset_dict['features_h5'].append(feature_h5_fname)
                             dataset_dict['ssgea_id'].append(ssgea)
                             dataset_dict['ssgsea_scores'].append(self.ssgsea_scores_dict[ssgea])
+                            print(self.tcga_brca_labels_dict[case_id])
                             dataset_dict['c_subtype'].append(self.tcga_brca_labels_dict[case_id]['c_subtype'])
                             dataset_dict['c_subtype_label'].append(self.tcga_brca_labels_dict[case_id]['c_subtype_label'])
 
