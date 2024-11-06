@@ -3,7 +3,7 @@
         "label_frac": 1.0,
         "encoding_size": 512,
         "n_folds": 1,
-        "n_classes":2,
+        "n_classes":4,
         "num_workers":4,
         "pin_memory":true
     },
