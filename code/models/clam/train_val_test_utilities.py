@@ -60,7 +60,6 @@ def train_val_pipeline(datasets, config_json, device, experiment_dir, checkpoint
     pin_memory = config_json["data"]["pin_memory"]
     epochs = config_json["hyperparameters"]["epochs"]
     early_stopping = config_json["hyperparameters"]["early_stopping"]
-    loss = config_json["hyperparameters"]["loss"]
     encoding_size = config_json['data']['encoding_size']
     features_ = config_json["features"]
     task_type = config_json["task_type"]
@@ -81,7 +80,6 @@ def train_val_pipeline(datasets, config_json, device, experiment_dir, checkpoint
         "pin_memory":pin_memory,
         "epochs":epochs,
         "early_stopping":early_stopping,
-        "loss":loss,
         "encoding_size":encoding_size,
         "features":features_,
         "task_type":task_type
@@ -102,7 +100,7 @@ def train_val_pipeline(datasets, config_json, device, experiment_dir, checkpoint
 
 
     # Get loss function
-    if task_type == "classification":
+    if task_type in ("classification", "clinical_subtype_classification"):
         loss_fn = nn.CrossEntropyLoss()
     elif task_type == "regression":
         loss_fn = nn.MSELoss()
@@ -130,7 +128,7 @@ def train_val_pipeline(datasets, config_json, device, experiment_dir, checkpoint
     model_dict.update({"size_arg": model_size})
     
     # AM-SB
-    if task_type == "classification":
+    if task_type in ("classification", "clinical_subtype_classification"):
         if model_type == 'am_sb':
             model = AM_SB(**model_dict)
         elif model_type == 'am_mb':
@@ -389,10 +387,20 @@ def train_loop_clam(epoch, model, loader, optimizer, n_classes, task_type, loss_
         if task_type == "classification":
             features, ssgsea_scores = input_data_dict['features'].to(device), input_data_dict['ssgsea_scores'].to(device)
             output_dict = model(features)
-            logits, y_pred = output_dict['logits'], output_dict['y_pred']
+            logits, y_pred, y_proba = output_dict['logits'], output_dict['y_pred'], output_dict['y_proba']
             train_y_pred.extend(list(y_pred.cpu().detach().numpy()))
             train_y.extend(list(ssgsea_scores.cpu().detach().numpy()))
+            train_y_pred_proba.extend(list(y_proba.cpu().detach().numpy()))
             loss = loss_fn(logits, ssgsea_scores)
+        
+        elif task_type == "clinical_subtype_classification":
+            features, c_subtypes = input_data_dict['features'].to(device), input_data_dict['c_subtype_label'].to(device)
+            output_dict = model(features)
+            logits, y_pred = output_dict['logits'], output_dict['y_pred'], output_dict['y_proba']
+            train_y_pred.extend(list(y_pred.cpu().detach().numpy()))
+            train_y.extend(list(c_subtypes.cpu().detach().numpy()))
+            train_y_pred_proba.extend(list(y_proba.cpu().detach().numpy()))
+            loss = loss_fn(logits, c_subtypes)
 
         elif task_type == "regression":
             features, ssgsea_scores, ssgsea_scores_bin = input_data_dict["features"].to(device), input_data_dict["ssgsea_scores"].to(device), input_data_dict["ssgsea_scores_bin"].to(device)
@@ -462,7 +470,40 @@ def train_loop_clam(epoch, model, loader, optimizer, n_classes, task_type, loss_
         )
 
     else:
-        pass
+        acc = accuracy(
+            preds=train_y_pred,
+            target=train_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
+
+        f1 = f1_score(
+            preds=train_y_pred,
+            target=train_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
+
+        rec = recall(
+            preds=train_y_pred,
+            target=train_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
+
+        prec = precision(
+            preds=train_y_pred,
+            target=train_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
+
+        auc = auroc(
+            preds=train_y_pred_proba,
+            target=train_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
 
     
     # Log metrics into W&B
@@ -501,11 +542,20 @@ def validate_loop_clam(model, loader, n_classes, task_type, tracking_params, los
             if task_type == "classification":
                 features, ssgsea_scores = input_data_dict['features'].to(device), input_data_dict['ssgsea_scores'].to(device)
                 output_dict = model(features)
-                logits, y_pred = output_dict['logits'], output_dict['y_pred']
+                logits, y_pred, y_proba = output_dict['logits'], output_dict['y_pred'], output_dict['y_proba']
                 val_y_pred.extend(list(y_pred.cpu().detach().numpy()))
                 val_y.extend(list(ssgsea_scores.cpu().detach().numpy()))
-                # val_y_pred_proba.extend(list(y_pred_proba.cpu().detach().numpy()))
+                val_y_pred_proba.extend(list(y_proba.cpu().detach().numpy()))
                 loss = loss_fn(logits, ssgsea_scores)
+            
+            elif task_type == "clinical_subtype_classification":
+                features, c_subtypes = input_data_dict['features'].to(device), input_data_dict['c_subtype_label'].to(device)
+                output_dict = model(features)
+                logits, y_pred = output_dict['logits'], output_dict['y_pred'], output_dict['y_proba']
+                val_y_pred.extend(list(y_pred.cpu().detach().numpy()))
+                val_y.extend(list(c_subtypes.cpu().detach().numpy()))
+                val_y_pred_proba.extend(list(y_proba.cpu().detach().numpy()))
+                loss = loss_fn(logits, c_subtypes)
 
             elif task_type == "regression":
                 features, ssgsea_scores, ssgsea_scores_bin = input_data_dict["features"].to(device), input_data_dict["ssgsea_scores"].to(device), input_data_dict["ssgsea_scores_bin"].to(device)
@@ -565,7 +615,40 @@ def validate_loop_clam(model, loader, n_classes, task_type, tracking_params, los
         )
 
     else:
-        pass
+        acc = accuracy(
+            preds=val_y_pred,
+            target=val_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
+
+        f1 = f1_score(
+            preds=val_y_pred,
+            target=val_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
+
+        rec = recall(
+            preds=val_y_pred,
+            target=val_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
+
+        prec = precision(
+            preds=val_y_pred,
+            target=val_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
+
+        auc = auroc(
+            preds=val_y_pred_proba,
+            target=val_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
 
     
     # Log metrics into W&B

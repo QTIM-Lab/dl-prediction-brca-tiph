@@ -14,7 +14,7 @@ import torch
 
 # Project Imports
 from train_val_test_utilities import train_val_pipeline
-from data_utilities import TCGABRCA_MIL_Dataset, TCGABRCA_MIL_DatasetRegression
+from data_utilities import TCGABRCA_MIL_Dataset, TCGABRCA_MIL_DatasetRegression, TCGABRCA_MIL_DatasetClinicalSubtype
 
 
 
@@ -68,7 +68,7 @@ if __name__ == "__main__":
             'kegg_cell_cycle', 
             'immunosuppression'
         ],
-        required=True,
+        required=False,
         help='The SSEGA pathways for the TCGA-BRCA dataset.'
     )
     parser.add_argument("--config_json", type=str, required=True, help="The path to the configuration JSON.")
@@ -130,6 +130,14 @@ if __name__ == "__main__":
                 n_folds=int(config_json["data"]["n_folds"]),
                 seed=int(args.seed)
             )
+        elif task_type == "clinical_subtype_classification":
+            dataset = TCGABRCA_MIL_DatasetClinicalSubtype(
+                base_data_path=args.base_data_path,
+                experimental_strategy=args.experimental_strategy,
+                features_h5_dir=args.features_h5_dir,
+                n_folds=int(config_json["data"]["n_folds"]),
+                seed=int(args.seed)
+            )
         elif task_type == "regression":
             dataset = TCGABRCA_MIL_DatasetRegression(
                 base_data_path=args.base_data_path,
@@ -168,6 +176,9 @@ if __name__ == "__main__":
 
         # Train model
         checkpoint_fname = f"best_model_kf{fold}.pt"
+        if args.label is None:
+            if task_type == "clinical_subtype_classification":
+                args.label = "c_subtype"
         train_val_pipeline(
             datasets=(train_set, val_set),
             config_json=config_json,
