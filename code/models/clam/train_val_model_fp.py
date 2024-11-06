@@ -91,6 +91,9 @@ if __name__ == "__main__":
 
     # Get timestamp and experiment directory
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    if args.label is None:
+        if config_json["task_type"] == "clinical_subtype_classification":
+            args.label = "c_subtype"
     experiment_dir = os.path.join(args.results_dir, args.label, timestamp)
     if not os.path.isdir(experiment_dir):
         os.makedirs(experiment_dir)
@@ -176,9 +179,6 @@ if __name__ == "__main__":
 
         # Train model
         checkpoint_fname = f"best_model_kf{fold}.pt"
-        if args.label is None:
-            if task_type == "clinical_subtype_classification":
-                args.label = "c_subtype"
         train_val_pipeline(
             datasets=(train_set, val_set),
             config_json=config_json,
