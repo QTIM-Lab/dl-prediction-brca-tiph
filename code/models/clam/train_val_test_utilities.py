@@ -18,10 +18,20 @@ from torchmetrics.functional.classification import (
     precision,
     auroc
 )
+from torchmetrics.functional.regression import (
+    mean_absolute_error,
+    mean_squared_error,
+    concordance_corrcoef,
+    kendall_rank_corrcoef,
+    pearson_corrcoef,
+    r2_score,
+    relative_squared_error,
+    spearman_corrcoef
+)
 
 # Sklearn Imports
-from sklearn.preprocessing import label_binarize
-from sklearn.metrics import roc_auc_score, roc_curve, auc, accuracy_score
+# from sklearn.preprocessing import label_binarize
+# from sklearn.metrics import roc_auc_score, roc_curve, auc, accuracy_score
 
 # Project Imports
 from model_utilities import AM_SB, AM_MB, AM_SB_Regression
@@ -298,7 +308,9 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
     # Initialize variables 
     test_y_pred = list()
     test_y_pred_proba = list()
+    test_y_pred_c = list()
     test_y = list()
+    test_y_c = list()
 
     # Get batch of data
     for _, input_data_dict in enumerate(test_loader):
@@ -324,8 +336,10 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
             logits = output_dict['logits']
             y_pred = torch.where(logits > 0, 1.0, 0.0)
             y_pred_proba = F.sigmoid(logits)
+            test_y_pred_c.extend(list(logits.squeeze(0).cpu().detach().numpy()))
             test_y_pred.extend(list(y_pred.squeeze(0).cpu().detach().numpy()))
             test_y.extend(list(ssgsea_scores_bin.cpu().detach().numpy()))
+            test_y_c.extend(list(ssgsea_scores.cpu().detach().numpy()))
             test_y_pred_proba.extend(list(y_pred_proba.squeeze(0).cpu().detach().numpy()))
 
 
@@ -333,6 +347,8 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
     test_y_pred = torch.from_numpy(np.array(test_y_pred))
     test_y = torch.from_numpy(np.array(test_y))
     test_y_pred_proba = torch.from_numpy(np.array(test_y_pred_proba))
+    test_y_pred_c = torch.from_numpy(np.array(test_y_pred_c))
+    test_y_c = torch.from_numpy(np.array(test_y_c))
 
     if n_classes == 2:
         acc = accuracy(
@@ -400,6 +416,48 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
             task='multiclass',
             num_classes=n_classes
         )
+    
+    if task_type == "regression":
+        mae = mean_absolute_error(
+            preds=test_y_pred_c,
+            target=test_y_c
+        )
+        
+        mse = mean_squared_error(
+            preds=test_y_pred_c,
+            target=test_y_c
+        )
+
+        ccc = concordance_corrcoef(
+            preds=test_y_pred_c,
+            target=test_y_c
+        )
+
+        krcc = kendall_rank_corrcoef(
+            preds=test_y_pred_c,
+            target=test_y_c
+        )
+
+        pcc = pearson_corrcoef(
+            preds=test_y_pred_c,
+            target=test_y_c
+        )
+
+        r2s = r2_score(
+            preds=test_y_pred_c,
+            target=test_y_c
+        )
+
+        rse = relative_squared_error(
+            preds=test_y_pred_c,
+            target=test_y_c
+        )
+
+        scc = spearman_corrcoef(
+            preds=test_y_pred_c,
+            target=test_y_c
+        )
+
 
 
     # Append test AUC to the test metrics
@@ -408,6 +466,16 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
     test_metrics["rec"] = [rec.item()]
     test_metrics["prec"] = [prec.item()]
     test_metrics["auc"] = [auc.item()]
+    
+    if task_type == "regression":
+        test_metrics["mae"] = [mae.item()]
+        test_metrics["mse"] = [mse.item()]
+        test_metrics["ccc"] = [ccc.item()]
+        test_metrics["krcc"] = [krcc.item()]
+        test_metrics["pcc"] = [pcc.item()]
+        test_metrics["r2s"] = [r2s.item()]
+        test_metrics["rse"] = [rse.item()]
+        test_metrics["scc"] = [scc.item()]
 
     return test_metrics
 
