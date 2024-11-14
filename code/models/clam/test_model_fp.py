@@ -148,8 +148,8 @@ if __name__ == "__main__":
         )
         if task_type == "regression":
             plt.title("Regression "+ args.checkpoint_dir.split('/')[-2])
-            plt.scatter(test_y_c, c="red", label="ground-truth")
-            plt.scatter(test_y_pred_c, c="blue", label="prediction")
+            plt.plot(test_y_c, test_y_c, "ro", label="ground-truth")
+            plt.plot(test_y_pred_c, test_y_pred_c, "bo", label="prediction")
             plt.savefig(
                 fname=os.path.join(args.checkpoint_dir, f"regression_fig{fold}.png"),
                 bbox_inches='tight'
