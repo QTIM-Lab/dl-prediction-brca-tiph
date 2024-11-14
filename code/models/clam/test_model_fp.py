@@ -7,6 +7,7 @@ import numpy as np
 import random
 import json
 import copy
+import matplotlib.pyplot as plt
 
 # PyTorch Imports
 import torch
@@ -138,14 +139,24 @@ if __name__ == "__main__":
 
 
         # Test model
-        test_metrics = test_pipeline(
+        test_metrics, test_y_c, test_y_pred_c = test_pipeline(
             test_set=test_set,
             config_json=config_json,
             device=device,
             checkpoint_dir=args.checkpoint_dir,
             fold=fold
         )
-        
+        if task_type == "regression":
+            plt.title("Regression "+ args.checkpoint_dir.split('/')[-2])
+            plt.scatter(test_y_c, c="red", label="ground-truth")
+            plt.scatter(test_y_pred_c, c="blue", label="prediction")
+            plt.savefig(
+                fname=os.path.join(args.checkpoint_dir, f"regression_fig{fold}.png"),
+                bbox_inches='tight'
+            )
+            plt.clf()
+            plt.close()
+
         # Convert test metrics into a dataframe
         test_metrics_df = pd.DataFrame.from_dict(test_metrics)
         test_metrics_df.to_csv(os.path.join(args.checkpoint_dir, f"test_metrics_kf{fold}.csv"))

@@ -477,7 +477,7 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
         test_metrics["rse"] = [rse.item()]
         test_metrics["scc"] = [scc.item()]
 
-    return test_metrics
+    return test_metrics, test_y_c.numpy(), test_y_pred_c.numpy()
 
 
 
