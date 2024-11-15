@@ -150,6 +150,7 @@ if __name__ == "__main__":
             plt.title("Regression "+ args.checkpoint_dir.split('/')[-2])
             plt.plot(test_y_c, test_y_c, "ro", label="ground-truth")
             plt.plot(test_y_pred_c, test_y_pred_c, "bo", label="prediction")
+            plt.legend()
             plt.savefig(
                 fname=os.path.join(args.checkpoint_dir, f"regression_fig{fold}.png"),
                 bbox_inches='tight'
