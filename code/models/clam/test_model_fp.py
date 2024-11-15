@@ -148,8 +148,9 @@ if __name__ == "__main__":
         )
         if task_type == "regression":
             plt.title("Regression "+ args.checkpoint_dir.split('/')[-2])
-            plt.plot(test_y_c, test_y_c, "ro", label="ground-truth")
-            plt.plot(test_y_pred_c, test_y_pred_c, "bo", label="prediction")
+            d_indices = [i for i in range(len(test_y_c))]
+            plt.plot(test_y_c, d_indices, "ro", label="ground-truth")
+            plt.plot(test_y_pred_c, d_indices, "bo", label="prediction")
             plt.legend()
             plt.savefig(
                 fname=os.path.join(args.checkpoint_dir, f"regression_fig{fold}.png"),
