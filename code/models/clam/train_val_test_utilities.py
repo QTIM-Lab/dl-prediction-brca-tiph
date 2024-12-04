@@ -321,7 +321,7 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
             logits, y_pred, y_proba = output_dict['logits'], output_dict['y_pred'], output_dict["y_proba"]
             test_y_pred.extend(list(y_pred.cpu().detach().numpy()))
             test_y.extend(list(ssgsea_scores.cpu().detach().numpy()))
-            test_y_pred_proba.extend(list(y_proba.cpu().detach().numpy()))
+            test_y_pred_proba.extend(list(y_proba.numpy()))
         
         elif task_type == "clinical_subtype_classification":
             features, c_subtypes = input_data_dict['features'].to(device), input_data_dict['c_subtype_label'].to(device)
