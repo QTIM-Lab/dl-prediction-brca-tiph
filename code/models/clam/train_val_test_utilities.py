@@ -353,6 +353,13 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
         test_y_c = torch.from_numpy(np.array(test_y_c))
 
     if n_classes == 2:
+        if len(test_y_pred.shape) > 1:
+            test_y_pred = test_y_pred.squeeze()
+        if len(test_y.shape) > 1:
+            test_y = test_y.squeeze()
+        if len(test_y_pred_proba.shape) > 1:
+            test_y_pred_proba = test_y_pred_proba.squeeze()
+
         acc = accuracy(
             preds=test_y_pred,
             target=test_y,
