@@ -80,6 +80,7 @@ if __name__ == "__main__":
     if "task_type" in config_json.keys():
         task_type = config_json["task_type"]
     else:
+        task_type = "classification"
         config_json["task_type"] = "classification"
 
     
