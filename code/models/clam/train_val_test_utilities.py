@@ -319,8 +319,7 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
             features, ssgsea_scores = input_data_dict['features'].to(device), input_data_dict['ssgsea_scores'].to(device)
             output_dict = model(features)
             logits, y_pred, y_proba = output_dict['logits'], output_dict['y_pred'], output_dict["y_proba"]
-            print(logits, logits.shape)
-            exit()
+            test_y_pred_c.extend(list(logits.cpu().detach().numpy()))
             test_y_pred.extend(list(y_pred.cpu().detach().numpy()))
             test_y.extend(list(ssgsea_scores.cpu().detach().numpy()))
             test_y_pred_proba.extend(list(y_proba.detach().numpy()))
@@ -353,15 +352,10 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
     if task_type == "regression":
         test_y_pred_c = torch.from_numpy(np.array(test_y_pred_c))
         test_y_c = torch.from_numpy(np.array(test_y_c))
+    elif task_type == "classification":
+        test_y_pred_c = torch.from_numpy(np.array(test_y_pred_c))
 
     if n_classes == 2:
-        if len(test_y_pred.shape) > 1:
-            test_y_pred = test_y_pred.squeeze()
-        if len(test_y.shape) > 1:
-            test_y = test_y.squeeze()
-        if len(test_y_pred_proba.shape) > 1:
-            test_y_pred_proba = test_y_pred_proba.squeeze()
-
         acc = accuracy(
             preds=test_y_pred,
             target=test_y,
@@ -386,11 +380,19 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
             task='binary'
         )
 
-        auc = auroc(
-            preds=test_y_pred_proba,
-            target=test_y,
-            task='binary'
-        )
+        if task_type == "classification":
+            auc = auroc(
+                preds=test_y_pred_c,
+                target=test_y,
+                num_classes=2,
+                task='multiclass'
+            )
+        else:
+            auc = auroc(
+                preds=test_y_pred_proba,
+                target=test_y,
+                task='binary'
+            )
 
     else:
         acc = accuracy(
