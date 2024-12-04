@@ -217,6 +217,7 @@ class AM_SB(nn.Module):
 
         # Apply Softmax to dim=1 to get a probability vector with shape [b, n_classes]
         y_proba_ = F.softmax(logits, dim=1)
+        print(y_proba_, y_proba_.shaoe)
         y_proba, _ = torch.max(y_proba_)
         y_pred = torch.argmax(y_proba_, dim=1)
 
