@@ -318,9 +318,10 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
         if task_type == "classification":
             features, ssgsea_scores = input_data_dict['features'].to(device), input_data_dict['ssgsea_scores'].to(device)
             output_dict = model(features)
-            logits, y_pred = output_dict['logits'], output_dict['y_pred']
+            logits, y_pred, y_proba = output_dict['logits'], output_dict['y_pred'], output_dict["y_proba"]
             test_y_pred.extend(list(y_pred.cpu().detach().numpy()))
             test_y.extend(list(ssgsea_scores.cpu().detach().numpy()))
+            test_y_pred_proba.extend(list(y_pred_proba.cpu().detach().numpy()))
         
         elif task_type == "clinical_subtype_classification":
             features, c_subtypes = input_data_dict['features'].to(device), input_data_dict['c_subtype_label'].to(device)
@@ -347,8 +348,9 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
     test_y_pred = torch.from_numpy(np.array(test_y_pred))
     test_y = torch.from_numpy(np.array(test_y))
     test_y_pred_proba = torch.from_numpy(np.array(test_y_pred_proba))
-    test_y_pred_c = torch.from_numpy(np.array(test_y_pred_c))
-    test_y_c = torch.from_numpy(np.array(test_y_c))
+    if task_type == "regression":
+        test_y_pred_c = torch.from_numpy(np.array(test_y_pred_c))
+        test_y_c = torch.from_numpy(np.array(test_y_c))
 
     if n_classes == 2:
         acc = accuracy(
