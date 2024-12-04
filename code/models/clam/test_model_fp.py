@@ -77,7 +77,10 @@ if __name__ == "__main__":
     verbose = config_json['verbose']
 
     # Task type
-    task_type = config_json["task_type"]
+    if "task_type" in config_json.keys():
+        task_type = config_json["task_type"]
+    else:
+        config_json["task_type"] = "classification"
 
     
     # Load data
