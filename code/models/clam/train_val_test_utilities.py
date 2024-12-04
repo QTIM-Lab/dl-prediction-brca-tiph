@@ -380,6 +380,8 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
             task='binary'
         )
 
+
+        # Note: Original implementation uses softmax for 2 classes, so we need to compute AUROC this way
         if task_type == "classification":
             auc = auroc(
                 preds=test_y_pred_c,
