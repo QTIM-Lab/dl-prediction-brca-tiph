@@ -434,7 +434,9 @@ class AM_MB(AM_SB):
         y_pred = torch.topk(logits, 1, dim = 1)[1]
         
         # y probability
-        y_proba = F.softmax(logits, dim = 1)
+        y_proba_ = F.softmax(logits, dim=1)
+        y_proba, _ = torch.max(y_proba_, dim=1)
+
 
         # Create a dictionary for the model outputs
         ouput_dict = {
