@@ -319,8 +319,6 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
             features, ssgsea_scores = input_data_dict['features'].to(device), input_data_dict['ssgsea_scores'].to(device)
             output_dict = model(features)
             logits, y_pred, y_proba = output_dict['logits'], output_dict['y_pred'], output_dict["y_proba"]
-            print(y_proba)
-            exit()
             test_y_pred.extend(list(y_pred.cpu().detach().numpy()))
             test_y.extend(list(ssgsea_scores.cpu().detach().numpy()))
             test_y_pred_proba.extend(list(y_proba.detach().numpy()))
