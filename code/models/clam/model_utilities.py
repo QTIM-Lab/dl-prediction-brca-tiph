@@ -216,8 +216,9 @@ class AM_SB(nn.Module):
         logits = self.classifier(M)
 
         # Apply Softmax to dim=1 to get a probability vector with shape [b, n_classes]
-        y_proba = F.softmax(logits, dim=1)
-        y_pred = torch.argmax(y_proba, dim=1)
+        y_proba_ = F.softmax(logits, dim=1)
+        y_proba = torch.max(y_proba_, dim=1)
+        y_pred = torch.argmax(y_proba_, dim=1)
 
         # Create a dictionary for the model outputs
         ouput_dict = {
