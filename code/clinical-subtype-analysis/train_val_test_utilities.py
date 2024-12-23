@@ -200,29 +200,29 @@ def compute_metrics_per_clinical_subtype(checkpoint_dir, n_classes=2, fold=0):
 
             # Compute metrics
             if n_classes == 2:
-                if len(test_y_pred.shape) == 2:
-                    test_y_pred = test_y_pred.squeeze()
+                if len(y_pred.shape) == 2:
+                    y_pred = y_pred.squeeze()
                 
                 acc = accuracy(
-                    preds=test_y_pred,
+                    preds=y_pred,
                     target=y,
                     task='binary'
                 )
 
                 f1 = f1_score(
-                    preds=test_y_pred,
+                    preds=y_pred,
                     target=y,
                     task='binary'
                 )
 
                 rec = recall(
-                    preds=test_y_pred,
+                    preds=y_pred,
                     target=y,
                     task='binary'
                 )
 
                 prec = precision(
-                    preds=test_y_pred,
+                    preds=y_pred,
                     target=y,
                     task='binary'
                 )
@@ -235,28 +235,28 @@ def compute_metrics_per_clinical_subtype(checkpoint_dir, n_classes=2, fold=0):
 
             else:
                 acc = accuracy(
-                    preds=test_y_pred,
+                    preds=y_pred,
                     target=y,
                     task='multiclass',
                     num_classes=n_classes
                 )
 
                 f1 = f1_score(
-                    preds=test_y_pred,
+                    preds=y_pred,
                     target=y,
                     task='multiclass',
                     num_classes=n_classes
                 )
 
                 rec = recall(
-                    preds=test_y_pred,
+                    preds=y_pred,
                     target=y,
                     task='multiclass',
                     num_classes=n_classes
                 )
 
                 prec = precision(
-                    preds=test_y_pred,
+                    preds=y_pred,
                     target=y,
                     task='multiclass',
                     num_classes=n_classes
