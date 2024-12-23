@@ -210,22 +210,34 @@ if __name__ == "__main__":
     # print("X.shape ", X.shape)
     y = np.array(y)
     # print("y.shape ", y.shape)
-    label_ = [c for c in y]
+    label_ = [f'class: {c}' for c in y]
     
     # t-SNE
     X_tsne = tsne.fit_transform(X)
     # print(f"t-SNE KL Divergence: {tsne.kl_divergence_}")
-    plt.scatter(
-        x=X_tsne[:, 0],
-        y=X_tsne[:, 1],
-        c=y,
-        label=label_
-    )
+    # plt.scatter(
+    #     x=X_tsne[:, 0],
+    #     y=X_tsne[:, 1],
+    #     c=y,
+    #     label=label_
+    # )
+    
+    # plt.legend(loc='best')
+    # plt.savefig(
+    #     fname='tsne_sample.png',
+    #     bbox_inches='tight'
+    # )
+    clset = set(zip(y, label_))
+    ax = plt.gca()
+    sc = ax.scatter(X_tsne[:, 0], X_tsne[:, 1], c=y)
+    handles = [plt.plot([],color=sc.get_cmap()(sc.norm(c)),ls="", marker="o")[0] for c,l in clset]
+    labels = [l for c,l in clset]
+    ax.legend(handles, labels, loc='best')
     plt.title(f't-SNE: {label}')
-    plt.xlabel('1st t-SNE Component')
-    plt.ylabel('2nd t-SNE Component')
-    plt.legend(loc='best')
+    ax.xlabel('1st t-SNE Component')
+    ax.ylabel('2nd t-SNE Component')
     plt.savefig(
         fname='tsne_sample.png',
         bbox_inches='tight'
     )
+    # plt.show()
