@@ -138,7 +138,7 @@ if __name__ == "__main__":
     
     # Load data
     print('Loading dataset...')
-    label = args.checkpoint_dir.split('/')[-2],
+    label = args.checkpoint_dir.split('/')[-2]
     if args.dataset == 'TCGA-BRCA':
         dataset = TCGABRCA_MIL_DatasetRegression(
             base_data_path=args.base_data_path,
