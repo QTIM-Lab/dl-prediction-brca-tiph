@@ -186,6 +186,7 @@ if __name__ == "__main__":
     
     # Create an X to train t-SNE
     X = list()
+    y = list()
     # Go through all the dataloaders
     for data_loader in (train_loader, val_loader, test_loader):
         for _, input_data_dict in enumerate(data_loader):
@@ -200,9 +201,12 @@ if __name__ == "__main__":
             # test_y_c.extend(list(ssgsea_scores.cpu().detach().numpy()))
             # test_y_pred_proba.extend(list(y_pred_proba.squeeze(0).cpu().detach().numpy()))
             X.extend(features_att.cpu().detach().numpy())
+            y.extend(ssgsea_scores_bin.cpu().detach().numpy())
 
     # Train t-sne
     X = np.array(X)
     print("X.shape ", X.shape)
+    y = np.array(y)
+    print("y.shape ", y.shape)
     X_tsne = tsne.fit_transform(X)
     print(f"t-SNE KL Divergence: {tsne.kl_divergence_}")
