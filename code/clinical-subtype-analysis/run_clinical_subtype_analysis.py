@@ -139,5 +139,5 @@ if __name__ == "__main__":
             test_inference_info_df.to_csv(os.path.join(args.checkpoint_dir, f"{eval_name}_inference_info_kf{fold}.csv"))
             os.makedirs(os.path.join('results', label), exist_ok=True)
             test_inference_info_df.to_csv(os.path.join('results', f"{eval_name}_inference_info_kf{fold}.csv"))
-            print(eval_name)
-            print(test_inference_info_df)
+            # print(eval_name)
+            # print(test_inference_info_df)

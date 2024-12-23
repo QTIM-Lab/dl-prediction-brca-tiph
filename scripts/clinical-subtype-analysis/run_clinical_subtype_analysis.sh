@@ -9,7 +9,7 @@ export CUDA_VISIBLE_DEVICES=MIG-752466c4-c584-5e2c-9402-e840a3cf5e6f
 
 
 
-echo 'Started AM-SB (Regression) Training on TCGA-BRCA Database.'
+echo 'Started Inference Info about Clinical Subtype TCGA-BRCA Database.'
 
 # List of checkpoint directories for AM_SB (CLAM/ResNet50 Features)
 CHECKPOINT_DIRS=('/autofs/space/crater_001/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_angiogenesis/2024-11-02_13-45-43'\
@@ -36,4 +36,4 @@ do
     --features_h5_dir '/autofs/space/crater_001/projects/breast-cancer-pathology/results/CONCH/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features' '/autofs/space/crater_001/projects/breast-cancer-pathology/results/CONCH/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features'
 done
 
-echo 'Finished AM-SB (Regression) Training on TCGA-BRCA Database.'
+echo 'Finished Inference Info about Clinical Subtype TCGA-BRCA Database.'
