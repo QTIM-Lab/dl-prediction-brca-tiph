@@ -3,7 +3,7 @@
 
 
 # Environment Variables
-export PYENV_VERSION=mmxbrcp
+# export PYENV_VERSION=mmxbrcp
 export LD_LIBRARY_PATH="/autofs/space/crater_001/tools/usr/lib64:${LD_LIBRARY_PATH}"
 export CUDA_VISIBLE_DEVICES=GPU-a6f9db4e-0b70-8386-34d7-46f9a00b32e9
 
