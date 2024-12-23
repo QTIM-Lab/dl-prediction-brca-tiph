@@ -210,7 +210,7 @@ if __name__ == "__main__":
     # print("X.shape ", X.shape)
     y = np.array(y)
     # print("y.shape ", y.shape)
-    label_ = [f'class: {c}' for c in y]
+    label_ = [c for c in y]
     
     # t-SNE
     X_tsne = tsne.fit_transform(X)
