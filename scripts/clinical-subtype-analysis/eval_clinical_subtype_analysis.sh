@@ -28,7 +28,7 @@ do
     echo "Checkpoint: $checkpoint_dir"
 
     python code/clinical-subtype-analysis/eval_clinical_subtype_analysis.py \
-    --gpu_id 0 \
+    --seed 42 \
     --checkpoint_dir $checkpoint_dir
 done
 
