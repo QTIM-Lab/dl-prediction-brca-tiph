@@ -6,6 +6,7 @@ import numpy as np
 import random
 import json
 import copy
+import matplotlib.pyplot as plt
 
 # PyTorch Imports
 import torch
@@ -137,11 +138,12 @@ if __name__ == "__main__":
     
     # Load data
     print('Loading dataset...')
+    label = args.checkpoint_dir.split('/')[-2],
     if args.dataset == 'TCGA-BRCA':
         dataset = TCGABRCA_MIL_DatasetRegression(
             base_data_path=args.base_data_path,
             experimental_strategy=args.experimental_strategy,
-            label=args.checkpoint_dir.split('/')[-2],
+            label=label,
             features_h5_dir=args.features_h5_dir,
             n_folds=1,
             seed=int(args.seed)
@@ -205,8 +207,18 @@ if __name__ == "__main__":
 
     # Train t-sne
     X = np.array(X)
-    print("X.shape ", X.shape)
+    # print("X.shape ", X.shape)
     y = np.array(y)
-    print("y.shape ", y.shape)
+    # print("y.shape ", y.shape)
     X_tsne = tsne.fit_transform(X)
-    print(f"t-SNE KL Divergence: {tsne.kl_divergence_}")
+    # print(f"t-SNE KL Divergence: {tsne.kl_divergence_}")
+    plt.scatter(
+        x=X_tsne[:, 0],
+        y=X_tsne[:, 1],
+        c=y
+    )
+    plt.title(f't-SNE: {label}')
+    plt.savefig(
+        fname='tsne_sample.png',
+        bbox_inches='tight'
+    )
