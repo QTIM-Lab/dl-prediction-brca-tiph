@@ -1,6 +1,7 @@
 # Imports
 import os
 import numpy as np
+import pandas as pd
 
 # PyTorch Imports
 import torch
@@ -171,3 +172,160 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
     test_inference_info["c_subtype"] = test_y_cs
 
     return test_inference_info
+
+
+
+# Function: Get metrics per clinical subtype and split
+def compute_metrics_per_clinical_subtype(checkpoint_dir, n_classes=2, fold=0):
+
+    # Get label
+    label = checkpoint_dir.split('/')[-2]
+
+    # Go through the possible evaluation names
+    for eval_name in ('train', 'val', 'test'):
+        csv_fpath = os.path.join(checkpoint_dir, f"{eval_name}_inference_info_kf{fold}.csv")
+        info_df = pd.read_csv(csv_fpath)
+        eval_metrics = dict()
+
+        # Go through the possible clinical subtypes
+        for c_subtype, c_subtype_name in zip(("HER2+/HR+", "HER2+/HR-", "HER2-/HR+", "HER2-/HR-"),("her2pos_hrpos", "her2pos_hrneg", "her2neg_hrpos", "her2neg_hrneg")):
+            info_df_ = info_df.copy()[info_df["c_subtype"]==c_subtype]
+
+            # Get needed values
+            y = torch.from_numpy(info_df_["ssgsea_b"].values)
+            y_c = torch.from_numpy(info_df_["ssgsea_c"].values)
+            y_pred = torch.from_numpy(info_df_["ssgsea_b_pred"].values)
+            y_pred_proba = torch.from_numpy(info_df_["ssgsea_b_pred_proba"].values)
+            y_pred_c = torch.from_numpy(info_df_["ssgsea_c_pred"].values)
+
+            # Compute metrics
+            if n_classes == 2:
+                if len(test_y_pred.shape) == 2:
+                    test_y_pred = test_y_pred.squeeze()
+                
+                acc = accuracy(
+                    preds=test_y_pred,
+                    target=y,
+                    task='binary'
+                )
+
+                f1 = f1_score(
+                    preds=test_y_pred,
+                    target=y,
+                    task='binary'
+                )
+
+                rec = recall(
+                    preds=test_y_pred,
+                    target=y,
+                    task='binary'
+                )
+
+                prec = precision(
+                    preds=test_y_pred,
+                    target=y,
+                    task='binary'
+                )
+
+                auc = auroc(
+                    preds=y_pred_proba,
+                    target=y,
+                    task='binary'
+                )
+
+            else:
+                acc = accuracy(
+                    preds=test_y_pred,
+                    target=y,
+                    task='multiclass',
+                    num_classes=n_classes
+                )
+
+                f1 = f1_score(
+                    preds=test_y_pred,
+                    target=y,
+                    task='multiclass',
+                    num_classes=n_classes
+                )
+
+                rec = recall(
+                    preds=test_y_pred,
+                    target=y,
+                    task='multiclass',
+                    num_classes=n_classes
+                )
+
+                prec = precision(
+                    preds=test_y_pred,
+                    target=y,
+                    task='multiclass',
+                    num_classes=n_classes
+                )
+
+                auc = auroc(
+                    preds=y_pred_proba,
+                    target=y,
+                    task='multiclass',
+                    num_classes=n_classes
+                )
+            
+            # Regression Metrics
+            mae = mean_absolute_error(
+                preds=y_pred_c,
+                target=y_c
+            )
+            
+            mse = mean_squared_error(
+                preds=y_pred_c,
+                target=y_c
+            )
+
+            ccc = concordance_corrcoef(
+                preds=y_pred_c,
+                target=y_c
+            )
+
+            krcc = kendall_rank_corrcoef(
+                preds=y_pred_c,
+                target=y_c
+            )
+
+            pcc = pearson_corrcoef(
+                preds=y_pred_c,
+                target=y_c
+            )
+
+            r2s = r2_score(
+                preds=y_pred_c,
+                target=y_c
+            )
+
+            rse = relative_squared_error(
+                preds=y_pred_c,
+                target=y_c
+            )
+
+            scc = spearman_corrcoef(
+                preds=y_pred_c,
+                target=y_c
+            )
+
+            # Append test AUC to the test metrics
+            eval_metrics["acc"] = [acc.item()]
+            eval_metrics["f1"] = [f1.item()]
+            eval_metrics["rec"] = [rec.item()]
+            eval_metrics["prec"] = [prec.item()]
+            eval_metrics["auc"] = [auc.item()]
+            eval_metrics["mae"] = [mae.item()]
+            eval_metrics["mse"] = [mse.item()]
+            eval_metrics["ccc"] = [ccc.item()]
+            eval_metrics["krcc"] = [krcc.item()]
+            eval_metrics["pcc"] = [pcc.item()]
+            eval_metrics["r2s"] = [r2s.item()]
+            eval_metrics["rse"] = [rse.item()]
+            eval_metrics["scc"] = [scc.item()]
+
+            eval_metrics_info_df = pd.DataFrame.from_dict(eval_metrics)
+            eval_metrics_info_df.to_csv(os.path.join(checkpoint_dir, f"{eval_name}_{c_subtype_name}_eval_metrics_info_kf{fold}.csv"))
+            os.makedirs(os.path.join('results', label), exist_ok=True)
+            eval_metrics_info_df.to_csv(os.path.join('results', label, f"{eval_name}_{c_subtype_name}_eval_metrics_info_kf{fold}.csv"))
