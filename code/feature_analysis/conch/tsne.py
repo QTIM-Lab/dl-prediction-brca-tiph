@@ -215,18 +215,6 @@ if __name__ == "__main__":
     # t-SNE
     X_tsne = tsne.fit_transform(X)
     # print(f"t-SNE KL Divergence: {tsne.kl_divergence_}")
-    # plt.scatter(
-    #     x=X_tsne[:, 0],
-    #     y=X_tsne[:, 1],
-    #     c=y,
-    #     label=label_
-    # )
-    
-    # plt.legend(loc='best')
-    # plt.savefig(
-    #     fname='tsne_sample.png',
-    #     bbox_inches='tight'
-    # )
     clset = set(zip(y, label_))
     ax = plt.gca()
     sc = ax.scatter(X_tsne[:, 0], X_tsne[:, 1], c=y)
@@ -237,7 +225,12 @@ if __name__ == "__main__":
     ax.set_xlabel('1st t-SNE Component')
     ax.set_ylabel('2nd t-SNE Component')
     plt.savefig(
-        fname='tsne_sample.png',
+        fname=os.path.join(experiment_dir, 'tsne_plot.png'),
         bbox_inches='tight'
     )
-    # plt.show()
+    plt.savefig(
+        fname=os.path.join('results', f'tsne_plot_{label}.png'),
+        bbox_inches='tight'
+    )
+    plt.clf()
+    plt.close()
