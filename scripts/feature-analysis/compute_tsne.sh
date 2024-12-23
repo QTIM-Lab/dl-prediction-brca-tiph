@@ -28,7 +28,7 @@ CHECKPOINT_DIRS=('/autofs/space/crater_001/projects/breast-cancer-pathology/resu
 
 for checkpoint_dir in "${CHECKPOINT_DIRS[@]}"
 do
-    python code/feature_analysis/conch/tsne.py \
+    python code/feature_analysis/conch/compute_tsne.py \
     --gpu_id 0 \
     --seed 42 \
     --checkpoint_dir $checkpoint_dir \
