@@ -13,7 +13,7 @@ import torch
 from torch.utils.data import DataLoader
 
 # UMAP Imports
-from umap import UMAP
+import umap
 
 # Project Imports
 from data_utilities import TCGABRCA_MIL_DatasetRegression
@@ -134,7 +134,7 @@ if __name__ == "__main__":
 
 
     # Load UMAP
-    reducer = UMAP()
+    reducer = umap.UMAP()
     
     # Load data
     print('Loading dataset...')
