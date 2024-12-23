@@ -145,7 +145,7 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
     # Get batch of data
     for _, input_data_dict in enumerate(test_loader):
 
-        features, ssgsea_scores, ssgsea_scores_bin, c_subtype, case_id, svs_path, = input_data_dict["features"].to(device), input_data_dict["ssgsea_scores"].to(device), input_data_dict["ssgsea_scores_bin"].to(device), input_data_dict["c_subtype"].to(device), input_data_dict["case_id"], input_data_dict["svs_path"]
+        features, ssgsea_scores, ssgsea_scores_bin, c_subtype, case_id, svs_path, = input_data_dict["features"].to(device), input_data_dict["ssgsea_scores"].to(device), input_data_dict["ssgsea_scores_bin"].to(device), input_data_dict["c_subtype"], input_data_dict["case_id"], input_data_dict["svs_path"]
         output_dict = model(features)
         logits = output_dict['logits']
         y_pred = torch.where(logits > 0, 1.0, 0.0)
@@ -155,7 +155,7 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
         test_y.extend(list(ssgsea_scores_bin.cpu().detach().numpy()))
         test_y_c.extend(list(ssgsea_scores.cpu().detach().numpy()))
         test_y_pred_proba.extend(list(y_pred_proba.squeeze(0).cpu().detach().numpy()))
-        test_y_cs.extend(list(c_subtype.cpu().detach().numpy()))
+        test_y_cs.extend(c_subtype)
         case_ids.extend(case_id)
         svs_paths.extend(svs_path)
 
