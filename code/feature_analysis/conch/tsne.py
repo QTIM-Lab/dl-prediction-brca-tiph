@@ -234,8 +234,8 @@ if __name__ == "__main__":
     labels = [l for c,l in clset]
     ax.legend(handles, labels, loc='best')
     plt.title(f't-SNE: {label}')
-    ax.xlabel('1st t-SNE Component')
-    ax.ylabel('2nd t-SNE Component')
+    ax.set_xlabel('1st t-SNE Component')
+    ax.set_ylabel('2nd t-SNE Component')
     plt.savefig(
         fname='tsne_sample.png',
         bbox_inches='tight'
