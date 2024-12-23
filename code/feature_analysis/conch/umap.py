@@ -13,7 +13,7 @@ import torch
 from torch.utils.data import DataLoader
 
 # UMAP Imports
-import umap
+import umap.umap_ as umap
 
 # Project Imports
 from data_utilities import TCGABRCA_MIL_DatasetRegression
