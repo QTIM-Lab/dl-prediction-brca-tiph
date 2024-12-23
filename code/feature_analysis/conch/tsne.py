@@ -199,7 +199,7 @@ if __name__ == "__main__":
             # test_y.extend(list(ssgsea_scores_bin.cpu().detach().numpy()))
             # test_y_c.extend(list(ssgsea_scores.cpu().detach().numpy()))
             # test_y_pred_proba.extend(list(y_pred_proba.squeeze(0).cpu().detach().numpy()))
-            X.extend(features_att.squeeze().cpu().detach().numpy())
+            X.extend(features_att.cpu().detach().numpy())
 
     # Train t-sne
     X = np.array(X)
