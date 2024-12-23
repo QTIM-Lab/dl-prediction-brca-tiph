@@ -210,14 +210,20 @@ if __name__ == "__main__":
     # print("X.shape ", X.shape)
     y = np.array(y)
     # print("y.shape ", y.shape)
+    label_ = [f'class: {c}' for c in y]
+    
+    # t-SNE
     X_tsne = tsne.fit_transform(X)
     # print(f"t-SNE KL Divergence: {tsne.kl_divergence_}")
     plt.scatter(
         x=X_tsne[:, 0],
         y=X_tsne[:, 1],
-        c=y
+        c=y,
+        label=label_
     )
     plt.title(f't-SNE: {label}')
+    plt.xlabel('1st t-SNE Component')
+    plt.ylabel('2nd t-SNE Component')
     plt.savefig(
         fname='tsne_sample.png',
         bbox_inches='tight'
