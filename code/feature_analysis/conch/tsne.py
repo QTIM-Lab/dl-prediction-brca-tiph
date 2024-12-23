@@ -224,7 +224,7 @@ if __name__ == "__main__":
     plt.title(f't-SNE: {label}')
     plt.xlabel('1st t-SNE Component')
     plt.ylabel('2nd t-SNE Component')
-    plt.legend()
+    plt.legend(loc='best')
     plt.savefig(
         fname='tsne_sample.png',
         bbox_inches='tight'
