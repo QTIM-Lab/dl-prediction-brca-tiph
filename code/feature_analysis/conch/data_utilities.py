@@ -49,6 +49,36 @@ class MGHPathDataset(Dataset):
         return features_h5_files
 
 
+    # Method: __len__
+    def __len__(self):
+        return len(self.features)
+
+
+    # Method: __getitem__
+    def __getitem__(self, idx):
+
+        # Get features .PT file
+        features_h5_path = self.features[idx]
+        # print("features_h5_path: ", features_h5_path)
+        with h5py.File(features_h5_path, "r") as f:
+            features = f["features"][()]
+        features = torch.from_numpy(features)
+        # print("features.shape: ", features.shape)
+
+        # Get WSI_ID
+        wsi_id = features_h5_path.split('/')[-2]
+        # print("wsi_id: ", wsi_id)
+
+        # Build input dictionary
+        input_data_dict = {
+            'wsi_id':wsi_id,
+            'features_h5_path':features_h5_path,
+            'features':features,
+        }
+
+        return input_data_dict
+
+
 
 # Class: OhioStatePathDataset
 class OhioStatePathDataset(Dataset):
