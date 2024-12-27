@@ -12,6 +12,171 @@ from sklearn.model_selection import GroupShuffleSplit
 
 
 
+# MGHPathDataset
+class MGHPathDataset(Dataset):
+    def __init__(self, base_data_path=None, features_h5_dir=None, seed=42, transform=None):
+        
+        assert base_data_path is not None
+        assert features_h5_dir is not None
+        assert seed is not None
+
+        # Class variables
+        self.base_data_path = base_data_path
+        self.features_h5_dir = features_h5_dir
+        self.seed = seed
+
+        # Get the .pt files with feature
+        self.features = self.get_features_h5()
+
+        # Class variables
+        self.transform = transform
+        
+        return
+
+
+    # Method: Get the list of .pt files in the features directory
+    def get_features_h5(self):
+
+        features_h5_files = list()
+
+        f_dir_folders = [f for f in os.listdir(self.features_h5_dir) if os.path.isdir(os.path.join(self.features_h5_dir, f))]            
+        for folder in f_dir_folders:
+            folder_files = [f for f in os.listdir(os.path.join(self.features_h5_dir, folder)) if not f.startswith('.')]
+            if 'original.h5' in folder_files:
+                features_h5_files.append(os.path.join(self.features_h5_dir, folder, 'original.h5'))
+        # print(len(features_h5_files))
+
+        return features_h5_files
+
+
+
+# Class: OhioStatePathDataset
+class OhioStatePathDataset(Dataset):
+    def __init__(self, base_data_path=None, features_h5_dir=None, seed=42, transform=None):
+        
+        assert base_data_path is not None
+        assert features_h5_dir is not None
+        assert seed is not None
+
+        # Class variables
+        self.base_data_path = base_data_path
+        self.features_h5_dir = features_h5_dir
+        self.seed = seed
+
+        # Get .TIFFs paths
+        self.tiffs_fpaths = self.get_ohiostatewsi_folders_and_tiff_fpaths()
+
+        # Get mapping of the .TIFF path to the renamed version
+        self.id2fpath_wsi = self.get_id2fpath_wsi()
+
+        # Get the .pt files with feature
+        self.features = self.get_features_h5()
+
+        # Class variables
+        self.transform = transform
+        
+        return
+
+
+    # Method: Get all folders and .TIFF paths from the Ohio State WSI dataset
+    def get_ohiostatewsi_folders_and_tiff_fpaths(self):
+
+        # Get the list of .TIFF files without subdirectory (i.e., root)
+        r_tiffs_ = [t for t in os.listdir(self.base_data_path) if not t.startswith('.')]
+        r_tiffs_ = [t for t in r_tiffs_ if not os.path.isdir(os.path.join(self.base_data_path, t))]
+        r_tiffs_ = [t for t in r_tiffs_ if t.endswith('.tiff')]
+        r_tiffs = [os.path.join(self.base_data_path, t) for t in r_tiffs_]
+
+        # Now, go through the folders (BATCHX)
+        r_subdirs = [sb for sb in os.listdir(self.base_data_path) if os.path.isdir(os.path.join(self.base_data_path, sb))]
+        r_subdirs = [sb for sb in r_subdirs if not sb.startswith('.')]
+        subdirs_fpaths = list()
+        for subdir in r_subdirs:
+            if subdir in ('BATCH2', 'BATCH3', 'BATCH4'):
+                subdir_path = os.path.join(self.base_data_path, subdir)
+                subdir_tiffs = [st for st in os.listdir(subdir_path) if not st.startswith('.')]
+                subdir_tiffs = [st for st in subdir_tiffs if st.endswith('.tiff')]
+                subdir_tiffs = [os.path.join(subdir_path, st) for st in subdir_tiffs]
+                subdirs_fpaths.extend(subdir_tiffs)
+        
+        # Create final list of fpaths
+        tiffs_fpaths = r_tiffs + subdirs_fpaths
+        # print(len(tiffs_fpaths))
+        # print(tiffs_fpaths)
+
+        # The original dataset currently has 70 .TIFF files
+        assert len(tiffs_fpaths) == 70
+        
+        return tiffs_fpaths
+
+
+    # Method: Get a mapping of the IDs to the Full Path
+    def get_id2fpath_wsi(self):
+
+        id2fpath_wsi = dict()
+
+        for tpath in self.tiffs_fpaths:
+            fname = tpath.split('/')[-1].split('.')[0]
+            # fname = f"{fname}_proc.tiff"
+            fname = fname.replace('&', '_')
+            fname = fname.replace(' ', '_')
+            fname = fname.replace('(', '_')
+            fname = fname.replace(')', '_')
+            id2fpath_wsi[fname] = tpath
+
+        return id2fpath_wsi
+
+
+    # Method: Get the list of .pt files in the features directory
+    def get_features_h5(self):
+
+        features_h5_files = list()
+
+        f_dir_folders = [f for f in os.listdir(self.features_h5_dir) if os.path.isdir(os.path.join(self.features_h5_dir, f))]            
+        for folder in f_dir_folders:
+            folder_files = [f for f in os.listdir(os.path.join(self.features_h5_dir, folder)) if not f.startswith('.')]
+            if 'original.h5' in folder_files:
+                features_h5_files.append(os.path.join(self.features_h5_dir, folder, 'original.h5'))
+        # print(len(features_h5_files))
+
+        return features_h5_files
+
+
+    # Method: __len__
+    def __len__(self):
+        return len(self.features)
+
+
+    # Method: __getitem__
+    def __getitem__(self, idx):
+
+        # Get features .PT file
+        features_h5_path = self.features[idx]
+        # print("features_h5_path: ", features_h5_path)
+        with h5py.File(features_h5_path, "r") as f:
+            features = f["features"][()]
+        features = torch.from_numpy(features)
+        # print("features.shape: ", features.shape)
+
+        # Get WSI_ID
+        wsi_id = features_h5_path.split('/')[-2].split('_proc')[0]
+        # print("wsi_id: ", wsi_id)
+
+        # Gat full path of the .TIFF
+        fpath = self.id2fpath_wsi[wsi_id]
+
+        # Build input dictionary
+        input_data_dict = {
+            'wsi_id':wsi_id,
+            'fpath':fpath,
+            'features_h5_path':features_h5_path,
+            'features':features,
+        }
+
+        return input_data_dict
+
+
+
 # Class: TCGABRCA_MIL_Dataset
 class TCGABRCA_MIL_Dataset(Dataset):
     def __init__(self, base_data_path='TCGA-BRCA', experimental_strategy='All', label=None, features_h5_dir=None, train_size=0.70, val_size=0.15, test_size=0.15, n_folds=10, seed=42, transform=None):
