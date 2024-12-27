@@ -245,7 +245,7 @@ if __name__ == "__main__":
     # Train t-sne
     X = np.array(X)
     y = np.array(y)
-    label_ = [dataset[c] for c in y]
+    label_ = [dataset_dict[c] for c in y]
     
     # t-SNE
     X_tsne = tsne.fit_transform(X)
