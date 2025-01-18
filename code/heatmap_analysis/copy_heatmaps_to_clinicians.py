@@ -86,6 +86,12 @@ for cp_dir in CHECKPOINT_DIRS:
             # print(wsi_hmap_info_df)
             label_ = wsi_hmap_info_df['label'].values[0]
             label = labels_dict[label_]
-            print(label_, label)
+            # print(label_, label)
+
+            # Copy heatmaps to the right folder
+            src = os.path.join(heatmaps_dir, wsi_hmaps_dir)
+            dst = os.path.join(CLINICIANS_DIR, label, task, wsi_hmaps_dir)
+            print(src, dst)
+
 
     exit()
