@@ -1,7 +1,7 @@
 # Imports
 import os
 import pandas as pd
-import json
+# import json
 import shutil
 
 
@@ -94,5 +94,8 @@ for cp_dir in CHECKPOINT_DIRS:
             dst = os.path.join(CLINICIANS_DIR, label, task, wsi_hmaps_dir)
             # print(src, dst)
             dst_ = shutil.copytree(src, dst, dirs_exist_ok=True)
-            print(dst_)
-            exit()
+            # print(dst_)
+
+
+
+print('Finished.')
