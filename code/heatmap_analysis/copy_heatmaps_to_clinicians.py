@@ -52,15 +52,20 @@ for cp_dir in CHECKPOINT_DIRS:
     # print(task)
 
     # assert 'config.json' in cp_dir_content
-    assert 'heatmaps' in cp_dir_content
-    assert 'test_metrics_kf0.csv' in cp_dir_content
-
     # Load configuration JSON
     # with open(os.path.join(cp_dir, 'config.json'), 'r') as j:
     #     config_json = json.load(j)
     # print(config_json)
 
+    # assert 'test_metrics_kf0.csv' in cp_dir_content
     # Open test metrics
     # test_metrics_df = pd.read_csv(os.path.join(cp_dir, 'test_metrics_kf0.csv'))
     # print(test_metrics_df)
  
+    assert 'test_set_kf0.csv' in cp_dir_content
+    # Open the results on test set
+    test_set_df = pd.read_csv(os.path.join(cp_dir, 'test_set_kf0.csv'))
+    print(test_set_df)
+    exit()
+
+    assert 'heatmaps' in cp_dir_content
