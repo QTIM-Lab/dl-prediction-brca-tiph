@@ -40,6 +40,12 @@ names_dict = {
     'kegg_cell_cycle':'cell_cycle'
 }
 
+# Dictionary to map labels
+labels_dict = {
+    0:'neg',
+    1:'pos'
+}
+
 
 
 # Go through the checkpoint directories
@@ -77,6 +83,8 @@ for cp_dir in CHECKPOINT_DIRS:
         if len(wsi_hmaps_dir_content) > 0:
             assert 'info.csv' in wsi_hmaps_dir_content
             wsi_hmap_info_df = pd.read_csv(os.path.join(heatmaps_dir, wsi_hmaps_dir, 'info.csv'))
-            print(wsi_hmap_info_df)
+            # print(wsi_hmap_info_df)
+            label = wsi_hmap_info_df['label'].values
+            print(label)
 
     exit()
