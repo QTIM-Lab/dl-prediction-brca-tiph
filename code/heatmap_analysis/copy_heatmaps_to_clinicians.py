@@ -52,6 +52,6 @@ for cp_dir in CHECKPOINT_DIRS:
 
 
     # Load configuration JSON
-    with open('config.json', 'r') as j:
+    with open(os.path.join(cp_dir, 'config.json'), 'r') as j:
         config_json = json.load(j)
     print(config_json)
