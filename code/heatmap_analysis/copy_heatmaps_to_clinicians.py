@@ -71,5 +71,7 @@ for cp_dir in CHECKPOINT_DIRS:
     assert 'heatmaps' in cp_dir_content
     heatmaps_dir = os.path.join(cp_dir, 'heatmaps')
     heatmaps_dir_content = os.listdir(heatmaps_dir)
-    print(heatmaps_dir_content)
+    # print(heatmaps_dir_content)
+    for wsi_hmaps_dir in heatmaps_dir_content:
+        print(os.listdir(os.path.join(heatmaps_dir, wsi_hmaps_dir)))
     exit()
