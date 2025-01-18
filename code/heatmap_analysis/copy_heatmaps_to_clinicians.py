@@ -84,7 +84,8 @@ for cp_dir in CHECKPOINT_DIRS:
             assert 'info.csv' in wsi_hmaps_dir_content
             wsi_hmap_info_df = pd.read_csv(os.path.join(heatmaps_dir, wsi_hmaps_dir, 'info.csv'))
             # print(wsi_hmap_info_df)
-            label = wsi_hmap_info_df['label'].values
-            print(label)
+            label_ = wsi_hmap_info_df['label'].values[0]
+            label = labels_dict[label_]
+            print(label_, label)
 
     exit()
