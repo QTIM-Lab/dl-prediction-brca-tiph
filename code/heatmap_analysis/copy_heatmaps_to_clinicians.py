@@ -2,6 +2,7 @@
 import os
 import pandas as pd
 import json
+import shutil
 
 
 
@@ -91,7 +92,7 @@ for cp_dir in CHECKPOINT_DIRS:
             # Copy heatmaps to the right folder
             src = os.path.join(heatmaps_dir, wsi_hmaps_dir)
             dst = os.path.join(CLINICIANS_DIR, label, task, wsi_hmaps_dir)
-            print(src, dst)
-
-
-    exit()
+            # print(src, dst)
+            dst_ = shutil.copytree(src, dst, dirs_exist_ok=True)
+            print(dst_)
+            exit()
