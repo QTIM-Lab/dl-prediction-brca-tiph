@@ -73,5 +73,10 @@ for cp_dir in CHECKPOINT_DIRS:
     heatmaps_dir_content = os.listdir(heatmaps_dir)
     # print(heatmaps_dir_content)
     for wsi_hmaps_dir in heatmaps_dir_content:
-        print(os.listdir(os.path.join(heatmaps_dir, wsi_hmaps_dir)))
+        wsi_hmaps_dir_content = os.listdir(os.path.join(heatmaps_dir, wsi_hmaps_dir))
+        if len(wsi_hmaps_dir_content) > 0:
+            assert 'info.csv' in wsi_hmaps_dir_content
+            wsi_hmap_info_df = pd.read_csv(os.path.join(heatmaps_dir, wsi_hmaps_dir, 'info.csv'))
+            print(wsi_hmap_info_df)
+
     exit()
