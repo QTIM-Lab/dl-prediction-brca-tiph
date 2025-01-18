@@ -45,6 +45,7 @@ names_dict = {
 # Go through the checkpoint directories
 for cp_dir in CHECKPOINT_DIRS:
     cp_dir_content = os.listdir(cp_dir)
+    print(cp_dir_content)
     task_ = cp_dir.split('/')[-2]
     # print(task_)
     task = names_dict[task_]
@@ -59,6 +60,7 @@ for cp_dir in CHECKPOINT_DIRS:
     #     config_json = json.load(j)
     # print(config_json)
 
-    test_metrics_df = pd.read_csv(os.path.join(cp_dir, 'test_metrics_kf0.csv'))
-    print(test_metrics_df)
+    # Open test metrics
+    # test_metrics_df = pd.read_csv(os.path.join(cp_dir, 'test_metrics_kf0.csv'))
+    # print(test_metrics_df)
  
