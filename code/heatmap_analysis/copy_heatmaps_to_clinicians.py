@@ -45,27 +45,31 @@ names_dict = {
 # Go through the checkpoint directories
 for cp_dir in CHECKPOINT_DIRS:
     cp_dir_content = os.listdir(cp_dir)
-    print(cp_dir_content)
+    # print(cp_dir_content)
     task_ = cp_dir.split('/')[-2]
     # print(task_)
     task = names_dict[task_]
     # print(task)
 
+    # Configuration JSON
     # assert 'config.json' in cp_dir_content
-    # Load configuration JSON
     # with open(os.path.join(cp_dir, 'config.json'), 'r') as j:
     #     config_json = json.load(j)
     # print(config_json)
 
+    # Test Metrics Information
     # assert 'test_metrics_kf0.csv' in cp_dir_content
-    # Open test metrics
     # test_metrics_df = pd.read_csv(os.path.join(cp_dir, 'test_metrics_kf0.csv'))
     # print(test_metrics_df)
- 
-    assert 'test_set_kf0.csv' in cp_dir_content
-    # Open the results on test set
-    test_set_df = pd.read_csv(os.path.join(cp_dir, 'test_set_kf0.csv'))
-    print(test_set_df)
-    exit()
+    
+    # Test Set Information
+    # assert 'test_set_kf0.csv' in cp_dir_content
+    # test_set_df = pd.read_csv(os.path.join(cp_dir, 'test_set_kf0.csv'))
+    # print(test_set_df)
 
+    # Heatmaps
     assert 'heatmaps' in cp_dir_content
+    heatmaps_dir = os.path.join(cp_dir, 'heatmaps')
+    heatmaps_dir_content = os.listdir(heatmaps_dir)
+    print(heatmaps_dir_content)
+    exit()
