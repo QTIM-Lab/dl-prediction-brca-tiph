@@ -45,7 +45,7 @@ names_dict = {
 # Go through the checkpoint directories
 for cp_dir in CHECKPOINT_DIRS:
     cp_dir_content = os.listdir(cp_dir)
-    task_ = cp_dir_content.split('/')[-2]
+    task_ = cp_dir.split('/')[-2]
     print(task_)
     task = names_dict[task_]
     print(task)
