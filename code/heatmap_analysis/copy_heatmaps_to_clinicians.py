@@ -46,16 +46,19 @@ names_dict = {
 for cp_dir in CHECKPOINT_DIRS:
     cp_dir_content = os.listdir(cp_dir)
     task_ = cp_dir.split('/')[-2]
-    print(task_)
+    # print(task_)
     task = names_dict[task_]
-    print(task)
+    # print(task)
 
     # assert 'config.json' in cp_dir_content
     assert 'heatmaps' in cp_dir_content
     assert 'test_metrics_kf0.csv' in cp_dir_content
 
-
     # Load configuration JSON
     # with open(os.path.join(cp_dir, 'config.json'), 'r') as j:
     #     config_json = json.load(j)
     # print(config_json)
+
+    test_metrics_df = pd.read_csv(os.path.join(cp_dir, 'test_metrics_kf0.csv'))
+    print(test_metrics_df)
+ 
