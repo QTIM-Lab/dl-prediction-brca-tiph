@@ -31,6 +31,7 @@ do
     --base_data_path '/autofs/space/crater_001/datasets/public/TCGA-BRCA' \
     --experimental_strategy 'All' \
     --features_h5_dir '/autofs/space/crater_001/projects/breast-cancer-pathology/results/CONCH/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features' '/autofs/space/crater_001/projects/breast-cancer-pathology/results/CONCH/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features' \
+    --patches_from 'CLAM' \
     --generate_heatmaps_for 'test' \
     --heatmap_config_file 'code/models/clam/config/tcgabrca_clam_fts_am_sb_heatmap_config.json' \
     --use_histoqc_quality_file '/autofs/space/crater_001/projects/breast-cancer-pathology/results/HistoQC/TCGA-BRCA/mmxbrcp/hqc_quality_file.csv' \
