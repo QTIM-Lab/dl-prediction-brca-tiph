@@ -293,7 +293,10 @@ if __name__ == '__main__':
 
 
     # Load GPU/CPU device
-    device = torch.device(f'cuda:{args.gpu_id}') if torch.cuda.is_available() else torch.device('cpu')
+    if args.gpu_id == -1:
+        device = torch.device('cpu')
+    else:
+        device = torch.device(f'cuda:{args.gpu_id}') if torch.cuda.is_available() else torch.device('cpu')
 
 
     # Get the encoding size for the feature vectors

@@ -25,7 +25,7 @@ do
     python code/models/clam/create_heatmaps_fp_clinicians.py \
     --clinicians_dir '/autofs/space/crater_001/projects/breast-cancer-pathology/clinicians' \
     --researchers_dir '/autofs/space/crater_001/projects/breast-cancer-pathology/researchers' \
-    --gpu_id 0 \
+    --gpu_id -1 \
     --checkpoint_dir $checkpoint_dir \
     --dataset 'TCGA-BRCA' \
     --base_data_path '/autofs/space/crater_001/datasets/public/TCGA-BRCA' \
