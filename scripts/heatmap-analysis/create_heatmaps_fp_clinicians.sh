@@ -22,7 +22,7 @@ do
     echo "Started CLAM Heatmap Generation for checkpoint: $checkpoint_dir"
     
     # CLAM Features
-    python code/models/clam/create_heatmaps_fp.py \
+    python code/models/clam/create_heatmaps_fp_clinicians.py \
     --clinicians_dir '/autofs/space/crater_001/projects/breast-cancer-pathology/clinicians' \
     --researchers_dir '/autofs/space/crater_001/projects/breast-cancer-pathology/researchers' \
     --gpu_id 0 \
