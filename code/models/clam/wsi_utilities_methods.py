@@ -114,8 +114,7 @@ def initialize_hdf5_bag(first_patch, save_coord=False):
     # Initialize a resizable dataset to hold the output
     img_shape = img_patch.shape
     maxshape = (None,) + img_shape[1:] #maximum dimensions up to which dataset maybe resized (None means unlimited)
-    dset = file.create_dataset('imgs', 
-                                shape=img_shape, maxshape=maxshape,  chunks=img_shape, dtype=dtype)
+    dset = file.create_dataset('imgs', shape=img_shape, maxshape=maxshape,  chunks=img_shape, dtype=dtype)
 
     dset[:] = img_patch
     dset.attrs['patch_level'] = patch_level

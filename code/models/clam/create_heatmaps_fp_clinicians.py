@@ -605,6 +605,9 @@ if __name__ == '__main__':
                 # Compute high-, low- and random attention scores
                 attention_scores = attention_scores.flatten()
                 s_indices = np.argsort(attention_scores)
+                print(coords)
+                print(coords.shape)
+
 
                 # High-attention and indices
                 h_indices = s_indices[-5:]
@@ -634,11 +637,9 @@ if __name__ == '__main__':
                 # print(study_data_dict)
 
                 for patch_set, patch_set_metadata in study_data_dict.items():
-                    print(patch_set)
-                    print(patch_set_metadata)
+                    # print(patch_set)
+                    # print(patch_set_metadata)
 
-
-                    exit()
                     # Compute/draw heatmap using the simplest parameters and save it
                     heatmap = drawHeatmapPatch(
                         scores=attention_scores, 

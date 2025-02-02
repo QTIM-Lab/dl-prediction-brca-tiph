@@ -790,18 +790,27 @@ class WholeSlideImage(object):
 
 
     # Method: Draw and visualize heatmaps patches
-    def visHeatmapPatch(self, scores, coords, vis_level=-1, 
-                   top_left=None, bot_right=None,
-                   patch_size=(256, 256), 
-                   blank_canvas=False, canvas_color=(220, 20, 50), alpha=0.4, 
-                   blur=False, overlap=0.0, 
-                   segment=True, use_holes=True,
-                   convert_to_percentiles=False, 
-                   binarize=False, thresh=0.5,
-                   max_size=None,
-                   custom_downsample = 1,
-                   cmap='coolwarm'):
-
+    def visHeatmapPatch(
+            self, 
+            scores, 
+            coords, 
+            vis_level=-1, 
+            top_left=None, 
+            bot_right=None,
+            patch_size=(256, 256), 
+            blank_canvas=False, 
+            canvas_color=(220, 20, 50), 
+            alpha=0.4, 
+            blur=False, 
+            overlap=0.0, 
+            segment=True, 
+            use_holes=True,
+            convert_to_percentiles=False, 
+            binarize=False, 
+            thresh=0.5,
+            max_size=None,
+            custom_downsample = 1,
+            cmap='coolwarm'):
         """
         Args:
             scores (numpy array of float): Attention scores 
