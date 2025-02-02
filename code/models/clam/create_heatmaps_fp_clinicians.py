@@ -639,7 +639,7 @@ if __name__ == '__main__':
                 for patch_set, patch_set_metadata in study_data_dict.items():
                     # print(patch_set)
                     # print(patch_set_metadata)
-
+                    exit()
                     # Compute/draw heatmap using the simplest parameters and save it
                     heatmap = drawHeatmapPatch(
                         scores=attention_scores, 
