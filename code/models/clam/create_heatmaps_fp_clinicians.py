@@ -647,18 +647,12 @@ if __name__ == '__main__':
                     # print(patch_set_metadata)
                     # Compute/draw heatmap using the simplest parameters and save it
                     heatmap_patches = drawHeatmapPatch(
-                        scores=patch_set["attention_scores"],
-                        indices=patch_set['indices'],
-                        coords=patch_set["coords"], 
+                        scores=patch_set_metadata["attention_scores"],
+                        indices=patch_set_metadata['indices'],
+                        coords=patch_set_metadata["coords"], 
                         slide_path=slide_path, 
                         wsi_object=wsi_object,
-                        cmap=heatmap_args['cmap'], 
-                        alpha=heatmap_args['alpha'], 
-                        use_holes=True, 
-                        binarize=False, 
                         vis_level=-1, 
-                        blank_canvas=False,
-                        thresh=-1, 
                         patch_size=vis_patch_size, 
                         convert_to_percentiles=True
                     )
