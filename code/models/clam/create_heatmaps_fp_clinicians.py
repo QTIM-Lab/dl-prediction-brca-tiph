@@ -603,16 +603,26 @@ if __name__ == '__main__':
 
                 # Compute high-, low- and random attention scores
                 print(attention_scores.shape)
+                attention_scores = attention_scores.flatten()
+                s_indices = np.argsort(attention_scores)
+                print(attention_scores.shape)
+
                 # High-attention and indices
-                h_attention_scores, h_indices = torch.max(attention_scores, dim=1)
+                h_indices = s_indices[0:5]
+                h_attention_scores = attention_scores[h_indices]
+                print(h_attention_scores.shape)
+                print(h_indices)
 
                 # Low-attention and indices
-                l_attention_scores, l_indices = torch.min(attention_scores, dim=1)
+                l_indices = s_indices[-5:]
+                l_attention_scores = attention_scores[l_indices]
+                print(l_attention_scores.shape)
+                print(l_indices)
 
                 # Random attention and indices
                 indices = [i for i in range(attention_scores.shape[0])]
                 r_indices = np.random.choice(indices, 5, False)
-                r_attention_scores = attention_scores[r_indices,:]
+                r_attention_scores = attention_scores[r_indices]
 
 
 
