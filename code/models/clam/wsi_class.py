@@ -793,24 +793,13 @@ class WholeSlideImage(object):
     def visHeatmapPatch(
             self, 
             scores, 
+            indices,
             coords, 
             vis_level=-1, 
             top_left=None, 
             bot_right=None,
             patch_size=(256, 256), 
-            blank_canvas=False, 
-            canvas_color=(220, 20, 50), 
-            alpha=0.4, 
-            blur=False, 
-            overlap=0.0, 
-            segment=True, 
-            use_holes=True,
-            convert_to_percentiles=False, 
-            binarize=False, 
-            thresh=0.5,
-            max_size=None,
-            custom_downsample = 1,
-            cmap='coolwarm'):
+            convert_to_percentiles=False):
         """
         Args:
             scores (numpy array of float): Attention scores 
@@ -842,15 +831,6 @@ class WholeSlideImage(object):
         if len(scores.shape) == 2:
             scores = scores.flatten()
 
-        if binarize:
-            if thresh < 0:
-                threshold = 1.0/len(scores)
-                
-            else:
-                threshold =  thresh
-        
-        else:
-            threshold = 0.0
 
         ##### calculate size of heatmap and filter coordinates/scores outside specified bbox region #####
         if top_left is not None and bot_right is not None:
@@ -881,118 +861,26 @@ class WholeSlideImage(object):
             scores = to_percentiles(scores) 
 
         scores /= 100
-        
-        ######## calculate the heatmap of raw attention scores (before colormap) 
-        # by accumulating scores over overlapped regions ######
-        
-        # heatmap overlay: tracks attention score over each pixel of heatmap
-        # overlay counter: tracks how many times attention score is accumulated over each pixel of heatmap
-        overlay = np.full(np.flip(region_size), 0).astype(float)
-        counter = np.full(np.flip(region_size), 0).astype(np.uint16)      
-        count = 0
-        for idx in range(len(coords)):
-            score = scores[idx]
-            coord = coords[idx]
-            if score >= threshold:
-                if binarize:
-                    score=1.0
-                    count+=1
-            else:
-                score=0.0
-            # accumulate attention
-            overlay[coord[1]:coord[1]+patch_size[1], coord[0]:coord[0]+patch_size[0]] += score
-            # accumulate counter
-            counter[coord[1]:coord[1]+patch_size[1], coord[0]:coord[0]+patch_size[0]] += 1
 
-        if binarize:
-            if self.verbose:
-                print('\nbinarized tiles based on cutoff of {}'.format(threshold))
-                print('identified {}/{} patches as positive'.format(count, len(coords)))
-        
-        # fetch attended region and average accumulated attention
-        zero_mask = counter == 0
+        # Downsample original image and use as canvas
+        img = np.array(self.wsi.read_region(top_left, vis_level, region_size).convert("RGB"))
 
-        if binarize:
-            overlay[~zero_mask] = np.around(overlay[~zero_mask] / counter[~zero_mask])
-        else:
-            overlay[~zero_mask] = overlay[~zero_mask] / counter[~zero_mask]
-        del counter 
-        if blur:
-            overlay = cv2.GaussianBlur(overlay,tuple((patch_size * (1-overlap)).astype(int) * 2 +1),0)  
-
-        if segment:
-            tissue_mask = self.get_seg_mask(region_size, scale, use_holes=use_holes, offset=tuple(top_left))
-            # return Image.fromarray(tissue_mask) # tissue mask
-        
-        if not blank_canvas:
-            # downsample original image and use as canvas
-            img = np.array(self.wsi.read_region(top_left, vis_level, region_size).convert("RGB"))
-        else:
-            # use blank canvas
-            img = np.array(Image.new(size=region_size, mode="RGB", color=(255,255,255))) 
-
-        #return Image.fromarray(img) #raw image
-
-        if self.verbose:
-            print('\ncomputing heatmap image')
-            print('total of {} patches'.format(len(coords)))
-        twenty_percent_chunk = max(1, int(len(coords) * 0.2))
-
-        if isinstance(cmap, str):
-            cmap = plt.get_cmap(cmap)
+        # Create a list of patches
+        heatmap_patches = list()
         
         for idx in range(len(coords)):
-            if (idx + 1) % twenty_percent_chunk == 0:
-                if self.verbose:
-                    print('progress: {}/{}'.format(idx, len(coords)))
             
-            score = scores[idx]
-            coord = coords[idx]
-            if score >= threshold:
+            # Get scores and coordinates
+            score, coord = scores[idx], coords[idx]
 
-                # attention block
-                raw_block = overlay[coord[1]:coord[1]+patch_size[1], coord[0]:coord[0]+patch_size[0]]
-                
-                # image block (either blank canvas or orig image)
-                img_block = img[coord[1]:coord[1]+patch_size[1], coord[0]:coord[0]+patch_size[0]].copy()
+            # Get patches of the attention blocks
+            img_block = img[coord[1]:coord[1]+patch_size[1], coord[0]:coord[0]+patch_size[0]].copy()
 
-                # color block (cmap applied to attention block)
-                color_block = (cmap(raw_block) * 255)[:,:,:3].astype(np.uint8)
+            # Append this to the list
+            heatmap_patches.append(img_block.copy())
 
-                if segment:
-                    # tissue mask block
-                    mask_block = tissue_mask[coord[1]:coord[1]+patch_size[1], coord[0]:coord[0]+patch_size[0]] 
-                    # copy over only tissue masked portion of color block
-                    img_block[mask_block] = color_block[mask_block]
-                else:
-                    # copy over entire color block
-                    img_block = color_block
 
-                # rewrite image block
-                img[coord[1]:coord[1]+patch_size[1], coord[0]:coord[0]+patch_size[0]] = img_block.copy()
-        
-        #return Image.fromarray(img) #overlay
-        if self.verbose:
-            print('Done')
-        del overlay
-
-        if blur:
-            img = cv2.GaussianBlur(img,tuple((patch_size * (1-overlap)).astype(int) * 2 +1),0)  
-
-        if alpha < 1.0:
-            img = self.block_blending(img, vis_level, top_left, bot_right, alpha=alpha, blank_canvas=blank_canvas, block_size=1024)
-        
-        img = Image.fromarray(img)
-        w, h = img.size
-
-        if custom_downsample > 1:
-            img = img.resize((int(w/custom_downsample), int(h/custom_downsample)))
-
-        if max_size is not None and (w > max_size or h > max_size):
-            resizeFactor = max_size/w if w > h else max_size/h
-            img = img.resize((int(w*resizeFactor), int(h*resizeFactor)))
-       
-        return img
+        return heatmap_patches
 
     
     def block_blending(self, img, vis_level, top_left, bot_right, alpha=0.5, blank_canvas=False, block_size=1024):

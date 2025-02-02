@@ -169,7 +169,7 @@ def drawHeatmap(scores, coords, slide_path=None, wsi_object=None, vis_level = -1
 
 
 # Function: Draw heatmaps patches
-def drawHeatmapPatch(scores, coords, slide_path=None, wsi_object=None, vis_level = -1, **kwargs):
+def drawHeatmapPatch(scores, indices, coords, slide_path=None, wsi_object=None, vis_level=-1, **kwargs):
     if wsi_object is None:
         wsi_object = WholeSlideImage(slide_path)
         print(wsi_object.name)
@@ -178,7 +178,7 @@ def drawHeatmapPatch(scores, coords, slide_path=None, wsi_object=None, vis_level
     if vis_level < 0:
         vis_level = wsi.get_best_level_for_downsample(32)
     
-    heatmap = wsi_object.visHeatmapPatch(scores=scores, coords=coords, vis_level=vis_level, **kwargs)
+    heatmap = wsi_object.visHeatmapPatch(scores=scores, indices=indices, coords=coords, vis_level=vis_level, **kwargs)
     return heatmap
 
 
@@ -605,8 +605,8 @@ if __name__ == '__main__':
                 # Compute high-, low- and random attention scores
                 attention_scores = attention_scores.flatten()
                 s_indices = np.argsort(attention_scores)
-                print(coords)
-                print(coords.shape)
+                # print(coords)
+                # print(coords.shape)
 
 
                 # High-attention and indices
@@ -615,7 +615,7 @@ if __name__ == '__main__':
                 h_coords = coords[h_indices]
                 # print(h_attention_scores.shape)
                 # print(h_indices)
-                print(h_coords)
+                # print(h_coords)
 
                 # Low-attention and indices
                 l_indices = s_indices[0:5]
@@ -623,33 +623,33 @@ if __name__ == '__main__':
                 l_coords = coords[l_indices]
                 # print(l_attention_scores.shape)
                 # print(l_indices)
-                print(l_coords)
+                # print(l_coords)
 
                 # Random attention and indices
                 indices = [i for i in range(attention_scores.shape[0])]
                 r_indices = np.random.choice(indices, 5, False)
                 r_attention_scores = attention_scores[r_indices]
                 r_coords = coords[r_indices]
-                print(r_coords)
+                # print(r_coords)
 
 
 
                 # Create a dictionary with all data we need to build the studies 
                 study_data_dict = {
-                    'high':{'attention_scores':h_attention_scores, 'indices':h_indices, 'directory':generate_random_string()},
-                    'low':{'attention_scores':l_attention_scores, 'indices':l_indices, 'directory':generate_random_string()},
-                    'random':{'attention_scores':r_attention_scores, 'indices':r_indices, 'directory':generate_random_string()}
+                    'high':{'attention_scores':h_attention_scores, 'indices':h_indices, 'directory':generate_random_string(), 'coords':h_coords},
+                    'low':{'attention_scores':l_attention_scores, 'indices':l_indices, 'directory':generate_random_string(), 'coords':l_coords},
+                    'random':{'attention_scores':r_attention_scores, 'indices':r_indices, 'directory':generate_random_string(), 'coords':r_coords}
                 }
                 # print(study_data_dict)
 
                 for patch_set, patch_set_metadata in study_data_dict.items():
                     # print(patch_set)
                     # print(patch_set_metadata)
-                    exit()
                     # Compute/draw heatmap using the simplest parameters and save it
-                    heatmap = drawHeatmapPatch(
-                        scores=attention_scores, 
-                        coords=coords, 
+                    heatmap_patches = drawHeatmapPatch(
+                        scores=patch_set["attention_scores"],
+                        indices=patch_set['indices'],
+                        coords=patch_set["coords"], 
                         slide_path=slide_path, 
                         wsi_object=wsi_object,
                         cmap=heatmap_args['cmap'], 
@@ -662,9 +662,11 @@ if __name__ == '__main__':
                         patch_size=vis_patch_size, 
                         convert_to_percentiles=True
                     )
+                    print(len(heatmap_patches))
+                    exit()
                     # heatmap.save(os.path.join(slide_save_dir, heatmap_save_name))
                     print(f"Saved simple heatmap image at: {os.path.join(slide_save_dir, heatmap_save_name)}")
-                    del heatmap
+                    del heatmap_patches
 
                 
 
