@@ -10,6 +10,7 @@ import shutil
 import json
 import h5py
 from scipy.stats import percentileofscore
+import string
 
 # PyTorch Imports
 import torch
@@ -224,6 +225,15 @@ def compute_from_patches(model_type, y_pred, model, features, coords, ref_scores
 
 
 
+# Function: Generate a random string with a give length (to generate the directories and folders)
+def generate_random_string(length=8):
+
+    random_string = ''.join(random.choices(string.ascii_letters + string.digits, k=length))
+
+    return random_string
+
+
+
 # Dictionary to map names of the tasks
 names_dict = {
     'gobp_b_cell_proliferation':'b_cell_proliferation',
@@ -251,7 +261,7 @@ labels_dict = {
 if __name__ == '__main__':
 
     # CLI
-    parser = argparse.ArgumentParser(description='CLAM: Heatmap Generation.')
+    parser = argparse.ArgumentParser(description='CLAM: Heatmap Generation (for Clinical Study).')
     parser.add_argument('--clinicians_dir', type=str, required=True, help="The directory where we will save these studies for the clinicians.")
     parser.add_argument('--researchers_dir', type=str, required=True, help="The directory where we will save these studies for the researchers.")
     parser.add_argument('--gpu_id', type=int, default=0, help="The ID of the GPU we will use to run the program.")
@@ -592,87 +602,53 @@ if __name__ == '__main__':
                 os.makedirs(slide_save_dir_researchers, exist_ok=True)
 
                 # Compute high-, low- and random attention scores
-                print(attention_scores)
                 print(attention_scores.shape)
-                print(heatmap_args["production_mode"])
+                # High-attention and indices
+                h_attention_scores, h_indices = torch.max(attention_scores, dim=1)
+
+                # Low-attention and indices
+                l_attention_scores, l_indices = torch.min(attention_scores, dim=1)
+
+                # Random attention and indices
+                indices = [i for i in range(attention_scores.shape[0])]
+                r_indices = np.random.choice(indices, 5, False)
+                r_attention_scores = attention_scores[r_indices,:]
+
+
+
+                # Create a dictionary with all data we need to build the studies 
+                study_data_dict = {
+                    'high':{'attention_scores':h_attention_scores, 'indices':h_indices, 'directory':generate_random_string()},
+                    'low':{'attention_scores':l_attention_scores, 'indices':l_indices, 'directory':generate_random_string()},
+                    'random':{'attention_scores':r_attention_scores, 'indices':r_indices, 'directory':generate_random_string()}
+                }
+                print(study_data_dict)
+                
                 exit()
-
-
-                if not heatmap_args["production_mode"]:
                     
-                    # Compute/draw heatmap using the simplest parameters and save it
-                    heatmap = drawHeatmapPatch(
-                        scores=attention_scores, 
-                        coords=coords, 
-                        slide_path=slide_path, 
-                        wsi_object=wsi_object,
-                        cmap=heatmap_args['cmap'], 
-                        alpha=heatmap_args['alpha'], 
-                        use_holes=True, 
-                        binarize=False, 
-                        vis_level=-1, 
-                        blank_canvas=False,
-                        thresh=-1, 
-                        patch_size=vis_patch_size, 
-                        convert_to_percentiles=True
-                    )
-                    heatmap.save(os.path.join(slide_save_dir, heatmap_save_name))
-                    if verbose:
-                        print(f"Saved simple heatmap image at: {os.path.join(slide_save_dir, heatmap_save_name)}")
-                    del heatmap
+                # Compute/draw heatmap using the simplest parameters and save it
+                heatmap = drawHeatmapPatch(
+                    scores=attention_scores, 
+                    coords=coords, 
+                    slide_path=slide_path, 
+                    wsi_object=wsi_object,
+                    cmap=heatmap_args['cmap'], 
+                    alpha=heatmap_args['alpha'], 
+                    use_holes=True, 
+                    binarize=False, 
+                    vis_level=-1, 
+                    blank_canvas=False,
+                    thresh=-1, 
+                    patch_size=vis_patch_size, 
+                    convert_to_percentiles=True
+                )
+                heatmap.save(os.path.join(slide_save_dir, heatmap_save_name))
+                if verbose:
+                    print(f"Saved simple heatmap image at: {os.path.join(slide_save_dir, heatmap_save_name)}")
+                del heatmap
 
                 
-                else:
 
-                    # Get reference attention scores
-                    ref_scores = attention_scores if heatmap_args['use_ref_scores'] else None
-                    
-
-                    # FIXME: This should be related to production mode
-                    if heatmap_args['calc_heatmap']:
-                        asset_dict = compute_from_patches(
-                            model_type=config_json["hyperparameters"]["model_type"],
-                            y_pred=y_pred,
-                            model=model,
-                            features=features,
-                            coords=coords,
-                            ref_scores=ref_scores,
-                            device=device
-                        )
-                        # print(asset_dict)
-
-
-                    # FIXME: Understand better the production mode
-                    # Create a dictionary for the visualization arguments of the heatmaps
-                    heatmap_vis_args = {
-                        'convert_to_percentiles':False if heatmap_args['use_ref_scores'] else True, 
-                        'vis_level':heatmap_args['vis_level'],
-                        'blur':heatmap_args['blur'], 
-                        'custom_downsample':heatmap_args['custom_downsample']
-                    }
-                
-
-                    # Generate heatmap
-                    heatmap = drawHeatmapPatch(
-                        scores=asset_dict["attention_scores"], 
-                        coords=asset_dict["coords"], 
-                        slide_path=slide_path, 
-                        wsi_object=wsi_object,
-                        cmap=heatmap_args['cmap'],
-                        alpha=heatmap_args['alpha'],
-                        **heatmap_vis_args, 
-                        binarize=heatmap_args['binarize'],
-                        blank_canvas=heatmap_args['blank_canvas'],
-                        thresh=heatmap_args['binary_thresh'],
-                        patch_size = vis_patch_size,
-                        overlap=data_args['overlap'],
-                        top_left=top_left,
-                        bot_right=bot_right
-                    )
-                    heatmap.save(os.path.join(slide_save_dir, heatmap_save_name))
-                    if verbose:
-                        print(f"Saved production heatmap image at: {os.path.join(slide_save_dir, heatmap_save_name)}")
-                    del heatmap
                 
 
                 # Save original slide (if needed)
