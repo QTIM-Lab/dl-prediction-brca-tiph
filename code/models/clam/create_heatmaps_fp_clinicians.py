@@ -657,7 +657,7 @@ if __name__ == '__main__':
                         coords=patch_set_metadata["coords"], 
                         slide_path=slide_path, 
                         wsi_object=wsi_object,
-                        vis_level=-1, 
+                        vis_level=0, 
                         patch_size=vis_patch_size, 
                         convert_to_percentiles=True
                     )

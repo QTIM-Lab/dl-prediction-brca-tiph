@@ -795,7 +795,7 @@ class WholeSlideImage(object):
             scores, 
             indices,
             coords, 
-            vis_level=-1, 
+            vis_level=0, 
             top_left=None, 
             bot_right=None,
             patch_size=(256, 256), 
@@ -821,40 +821,22 @@ class WholeSlideImage(object):
             custom_downsample (int): additionally downscale the heatmap by specified factor
             cmap (str): name of matplotlib colormap to use
         """
-
-        if vis_level < 0:
-            vis_level = self.wsi.get_best_level_for_downsample(32)
-
-        downsample = self.level_downsamples[vis_level]
-        scale = [1/downsample[0], 1/downsample[1]] # Scaling from 0 to desired level
                 
         if len(scores.shape) == 2:
             scores = scores.flatten()
 
 
-        ##### calculate size of heatmap and filter coordinates/scores outside specified bbox region #####
-        if top_left is not None and bot_right is not None:
-            scores, coords = screen_coords(scores, coords, top_left, bot_right)
-            coords = coords - top_left
-            top_left = tuple(top_left)
-            bot_right = tuple(bot_right)
-            w, h = tuple((np.array(bot_right) * scale).astype(int) - (np.array(top_left) * scale).astype(int))
-            region_size = (w, h)
+        # WSI Information
+        region_size = self.level_dim[vis_level]
+        top_left = (0,0)
+        bot_right = self.level_dim[0]
+        w, h = region_size
 
-        else:
-            region_size = self.level_dim[vis_level]
-            top_left = (0,0)
-            bot_right = self.level_dim[0]
-            w, h = region_size
 
-        patch_size  = np.ceil(np.array(patch_size) * np.array(scale)).astype(int)
-        coords = np.ceil(coords * np.array(scale)).astype(int)
-        
-        if self.verbose:
-            print('\ncreating heatmap for: ')
-            print('top_left: ', top_left, 'bot_right: ', bot_right)
-            print('w: {}, h: {}'.format(w, h))
-            print('scaled patch size: ', patch_size)
+        print('\ncreating heatmap for: ')
+        print('top_left: ', top_left, 'bot_right: ', bot_right)
+        print('w: {}, h: {}'.format(w, h))
+        print('scaled patch size: ', patch_size)
 
         ###### normalize filtered scores ######
         if convert_to_percentiles:
