@@ -11,6 +11,7 @@ import json
 import h5py
 from scipy.stats import percentileofscore
 import string
+from PIL import Image
 
 # PyTorch Imports
 import torch
@@ -645,6 +646,10 @@ if __name__ == '__main__':
                 for patch_set, patch_set_metadata in study_data_dict.items():
                     # print(patch_set)
                     # print(patch_set_metadata)
+
+                    patch_set_save_dir = os.path.join(slide_save_dir_clinicians, patch_set_metadata['directory'])
+                    os.makedirs(patch_set_save_dir, exist_ok=True)
+
                     # Compute/draw heatmap using the simplest parameters and save it
                     heatmap_patches = drawHeatmapPatch(
                         scores=patch_set_metadata["attention_scores"],
@@ -656,15 +661,16 @@ if __name__ == '__main__':
                         patch_size=vis_patch_size, 
                         convert_to_percentiles=True
                     )
-                    print(len(heatmap_patches))
-                    exit()
-                    # heatmap.save(os.path.join(slide_save_dir, heatmap_save_name))
-                    print(f"Saved simple heatmap image at: {os.path.join(slide_save_dir, heatmap_save_name)}")
+                    # print(len(heatmap_patches))
+                    
+                    for patch_idx, patch_arr in enumerate(heatmap_patches):
+                        patch_pil = Image.fromarray(patch_arr).convert('RGB')
+                        patch_pil.save(os.path.join(patch_set_save_dir, f'{patch_idx}.png'))
+                    print(f"Saved {patch_set}-attention patches heatmap image at: {patch_set_save_dir}")
                     del heatmap_patches
+                exit()
 
-                
 
-                
 
                 # Save original slide (if needed)
                 if heatmap_args['save_orig']:
