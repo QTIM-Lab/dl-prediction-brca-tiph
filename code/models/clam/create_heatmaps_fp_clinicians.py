@@ -529,6 +529,7 @@ if __name__ == '__main__':
                 mask_id = mask_dir.split('/')[-1]
                 mask_fname = f"{mask_id}_mask_use.png"
                 mask_file = os.path.join(mask_dir, mask_fname)
+                mask_file = mask_file.replace('/autofs/cluster/qtim/projects/', '/autofs/space/crater_001/projects/')
             else:
                 pass
             
