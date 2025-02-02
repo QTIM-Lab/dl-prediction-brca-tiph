@@ -708,6 +708,7 @@ if __name__ == '__main__':
                     annotation_dict["annotations"].append("")
                     gt_dict["folders"].append(patch_set_metadata['directory'])
                     gt_dict["annotations"].append(patch_set)
+                random.shuffle(annotation_dict["folders"])
 
                 # Convert dictionaries into DataFrames
                 annotation_df = pd.DataFrame.from_dict(annotation_dict)
