@@ -602,19 +602,17 @@ if __name__ == '__main__':
                 os.makedirs(slide_save_dir_researchers, exist_ok=True)
 
                 # Compute high-, low- and random attention scores
-                print(attention_scores.shape)
                 attention_scores = attention_scores.flatten()
                 s_indices = np.argsort(attention_scores)
-                print(attention_scores.shape)
 
                 # High-attention and indices
-                h_indices = s_indices[0:5]
+                h_indices = s_indices[-5:]
                 h_attention_scores = attention_scores[h_indices]
                 print(h_attention_scores.shape)
                 print(h_indices)
 
                 # Low-attention and indices
-                l_indices = s_indices[-5:]
+                l_indices = s_indices[0:5]
                 l_attention_scores = attention_scores[l_indices]
                 print(l_attention_scores.shape)
                 print(l_indices)
