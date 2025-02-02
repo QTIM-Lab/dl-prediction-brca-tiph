@@ -592,8 +592,9 @@ if __name__ == '__main__':
                 os.makedirs(slide_save_dir_researchers, exist_ok=True)
 
                 # Compute high-, low- and random attention scores
-                print(attention_scores.shape)
                 print(attention_scores)
+                print(attention_scores.shape)
+                print(heatmap_args["production_mode"])
                 exit()
 
 
