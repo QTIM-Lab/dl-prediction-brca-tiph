@@ -608,14 +608,14 @@ if __name__ == '__main__':
                 # High-attention and indices
                 h_indices = s_indices[-5:]
                 h_attention_scores = attention_scores[h_indices]
-                print(h_attention_scores.shape)
-                print(h_indices)
+                # print(h_attention_scores.shape)
+                # print(h_indices)
 
                 # Low-attention and indices
                 l_indices = s_indices[0:5]
                 l_attention_scores = attention_scores[l_indices]
-                print(l_attention_scores.shape)
-                print(l_indices)
+                # print(l_attention_scores.shape)
+                # print(l_indices)
 
                 # Random attention and indices
                 indices = [i for i in range(attention_scores.shape[0])]
@@ -630,30 +630,33 @@ if __name__ == '__main__':
                     'low':{'attention_scores':l_attention_scores, 'indices':l_indices, 'directory':generate_random_string()},
                     'random':{'attention_scores':r_attention_scores, 'indices':r_indices, 'directory':generate_random_string()}
                 }
-                print(study_data_dict)
-                
-                exit()
-                    
-                # Compute/draw heatmap using the simplest parameters and save it
-                heatmap = drawHeatmapPatch(
-                    scores=attention_scores, 
-                    coords=coords, 
-                    slide_path=slide_path, 
-                    wsi_object=wsi_object,
-                    cmap=heatmap_args['cmap'], 
-                    alpha=heatmap_args['alpha'], 
-                    use_holes=True, 
-                    binarize=False, 
-                    vis_level=-1, 
-                    blank_canvas=False,
-                    thresh=-1, 
-                    patch_size=vis_patch_size, 
-                    convert_to_percentiles=True
-                )
-                heatmap.save(os.path.join(slide_save_dir, heatmap_save_name))
-                if verbose:
+                # print(study_data_dict)
+
+                for patch_set, patch_set_metadata in study_data_dict.items():
+                    print(patch_set)
+                    print(patch_set_metadata)
+
+
+                    exit()
+                    # Compute/draw heatmap using the simplest parameters and save it
+                    heatmap = drawHeatmapPatch(
+                        scores=attention_scores, 
+                        coords=coords, 
+                        slide_path=slide_path, 
+                        wsi_object=wsi_object,
+                        cmap=heatmap_args['cmap'], 
+                        alpha=heatmap_args['alpha'], 
+                        use_holes=True, 
+                        binarize=False, 
+                        vis_level=-1, 
+                        blank_canvas=False,
+                        thresh=-1, 
+                        patch_size=vis_patch_size, 
+                        convert_to_percentiles=True
+                    )
+                    # heatmap.save(os.path.join(slide_save_dir, heatmap_save_name))
                     print(f"Saved simple heatmap image at: {os.path.join(slide_save_dir, heatmap_save_name)}")
-                del heatmap
+                    del heatmap
 
                 
 
