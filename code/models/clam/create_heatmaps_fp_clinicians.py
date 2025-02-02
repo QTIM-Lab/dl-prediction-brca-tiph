@@ -668,7 +668,6 @@ if __name__ == '__main__':
                         patch_pil.save(os.path.join(patch_set_save_dir, f'{patch_idx}.png'))
                     print(f"Saved {patch_set}-attention patches heatmap image at: {patch_set_save_dir}")
                     del heatmap_patches
-                exit()
 
 
 
@@ -688,19 +687,36 @@ if __name__ == '__main__':
                         view_slide_only=True,
                         custom_downsample=heatmap_args['custom_downsample']
                     )
-                    wsi_img.save(os.path.join(slide_save_dir, wsi_img_save_name))
-                    if verbose:
-                        print(f"Saved original WSI image at: {os.path.join(slide_save_dir, wsi_img_save_name)}")
+                    wsi_img.save(os.path.join(slide_save_dir_clinicians, f'original_wsi.png'))
+                    print("Saved original WSI image at: ", os.path.join(slide_save_dir_clinicians, f'original_wsi.png'))
                     del wsi_img
 
                 
 
-                # Create small CSV with this important information
-                info_dict = dict()
-                info_dict["label"] = [label]
-                info_dict["y_pred"] = [y_pred]
-                for c, p in enumerate(y_probas):
-                    info_dict[f"y_probas_{c}"] = [p]
+                # Create a helper CSV for clinicians annotation
+                annotation_dict = dict()
+                annotation_dict["folders"] = list()
+                annotation_dict["annotations"] = list()
+
+                # Create a helper CSV for researchers cross-data
+                gt_dict = dict()
+                gt_dict["folders"] = list()
+                gt_dict["annotations"] = list()
+
+                for patch_set, patch_set_metadata in study_data_dict.items():
+                    annotation_dict["folders"].append(patch_set_metadata['directory'])
+                    annotation_dict["annotations"].append("")
+                    gt_dict["folders"].append(patch_set_metadata['directory'])
+                    gt_dict["annotations"].append(patch_set)
+
+                # Convert dictionaries into DataFrames
+                annotation_df = pd.DataFrame.from_dict(annotation_dict)
+                gt_df = pd.DataFrame.from_dict(gt_dict)
                 
-                info_df = pd.DataFrame.from_dict(info_dict)
-                info_df.to_csv(os.path.join(slide_save_dir, f"info.csv"))
+                # Save CSV files to the right directories
+                annotation_df.to_csv(os.path.join(slide_save_dir_clinicians, "annotation_file.csv"))
+                print("Saved annotation file to: ", os.path.join(slide_save_dir_clinicians, "annotation_file.csv"))
+                
+                gt_df.to_csv(os.path.join(slide_save_dir_researchers, "gt_file.csv"))
+                print("Saved gt file to: ", os.path.join(slide_save_dir_researchers, "gt_file.csv"))
+                exit()
