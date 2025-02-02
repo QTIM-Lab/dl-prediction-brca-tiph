@@ -612,19 +612,25 @@ if __name__ == '__main__':
                 # High-attention and indices
                 h_indices = s_indices[-5:]
                 h_attention_scores = attention_scores[h_indices]
+                h_coords = coords[h_indices]
                 # print(h_attention_scores.shape)
                 # print(h_indices)
+                print(h_coords)
 
                 # Low-attention and indices
                 l_indices = s_indices[0:5]
                 l_attention_scores = attention_scores[l_indices]
+                l_coords = coords[l_indices]
                 # print(l_attention_scores.shape)
                 # print(l_indices)
+                print(l_coords)
 
                 # Random attention and indices
                 indices = [i for i in range(attention_scores.shape[0])]
                 r_indices = np.random.choice(indices, 5, False)
                 r_attention_scores = attention_scores[r_indices]
+                r_coords = coords[r_indices]
+                print(r_coords)
 
 
 
