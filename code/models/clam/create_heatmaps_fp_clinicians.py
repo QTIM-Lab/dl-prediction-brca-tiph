@@ -673,7 +673,7 @@ if __name__ == '__main__':
 
                 # Save original slide (if needed)
                 if heatmap_args['save_orig']:
-                    
+
                     # Get visualization level
                     assert heatmap_args['vis_level'] >= 0
                     vis_level = heatmap_args['vis_level']
@@ -720,4 +720,3 @@ if __name__ == '__main__':
                 
                 gt_df.to_csv(os.path.join(slide_save_dir_researchers, "gt_file.csv"))
                 print("Saved gt file to: ", os.path.join(slide_save_dir_researchers, "gt_file.csv"))
-                exit()
