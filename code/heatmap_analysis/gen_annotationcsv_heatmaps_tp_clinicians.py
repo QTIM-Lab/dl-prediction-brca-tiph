@@ -95,6 +95,7 @@ if __name__ == '__main__':
 
     # Convert Dictionary into a DataFrame
     data_df = pd.DataFrame.from_dict(data_dict)
+    print(data_df)
 
     # Save a CSV
     data_df.to_csv(os.path.join(task_dir, "global_annotation.csv"))
