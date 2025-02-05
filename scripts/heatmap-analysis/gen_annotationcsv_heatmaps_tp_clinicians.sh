@@ -23,7 +23,7 @@ do
     echo "Task: $task"
     
     # CLAM Features
-    python code/models/clam/gen_annotationcsv_heatmaps_tp_clinicians.py \
+    python code/heatmap_analysis/gen_annotationcsv_heatmaps_tp_clinicians.py \
     --clinicians_dir '/autofs/space/crater_001/projects/breast-cancer-pathology/clinicians' \
     --researchers_dir '/autofs/space/crater_001/projects/breast-cancer-pathology/researchers' \
     --task $task
