@@ -5,26 +5,6 @@ import pandas as pd
 
 
 
-# Method: Obtain Case ID
-def get_case_id(wsi_path_or_name, mode='simple'):
-
-    assert mode in ('simple', 'extended')
-
-    # Pipeline to get Case ID
-    parsed_path = wsi_path_or_name.split('/')[-1]
-    parsed_path = parsed_path.split('.')[0]
-    if mode == 'simple':
-        parsed_path = parsed_path.split('-')[0:3]
-    else:
-        parsed_path = parsed_path.split('-')[0:4]
-
-    # Get CID
-    case_id = '-'.join(parsed_path)
-
-    return case_id
-
-
-
 if __name__ == '__main__':
 
     # CLI
@@ -35,6 +15,23 @@ if __name__ == '__main__':
     parser.add_argument('--verbose', action="store_true", help="Print execution information.")
     args = parser.parse_args()
 
+    # Method: Obtain Case ID
+    def get_case_id(wsi_path_or_name, mode='simple'):
+
+        assert mode in ('simple', 'extended')
+
+        # Pipeline to get Case ID
+        parsed_path = wsi_path_or_name.split('/')[-1]
+        parsed_path = parsed_path.split('.')[0]
+        if mode == 'simple':
+            parsed_path = parsed_path.split('-')[0:3]
+        else:
+            parsed_path = parsed_path.split('-')[0:4]
+
+        # Get CID
+        case_id = '-'.join(parsed_path)
+
+        return case_id
 
 
     # Create a dictionary with data
