@@ -51,14 +51,16 @@ if __name__ == '__main__':
 
     # Open the task directory
     task_dir = os.path.join(args.clinicians_dir, args.task)
+    # print(task_dir)
     
     # Go through labels
     for label in ["neg", "pos"]:
         label_dir = os.path.join(task_dir, label)
+        # print(label_dir)
 
         # Get WSIs
         wsi_dirs = os.listdir(label_dir)
-        wsi_dirs = [d for d in wsi_dirs if os.path.isdir(os.path.join(label, d))]
+        wsi_dirs = [d for d in wsi_dirs if os.path.isdir(os.path.join(label_dir, d))]
 
         # Go through WSI directories
         for wsi in wsi_dirs:
@@ -90,7 +92,7 @@ if __name__ == '__main__':
                     data_dict["img"].append(img)
                     data_dict["img_path"].append(img_path)
                     data_dict["annotation"].append("")
-                    print(data_dict)
+                    # print(data_dict)
 
 
 
