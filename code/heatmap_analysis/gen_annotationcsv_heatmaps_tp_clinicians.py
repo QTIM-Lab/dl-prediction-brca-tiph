@@ -90,6 +90,7 @@ if __name__ == '__main__':
                     data_dict["img"].append(img)
                     data_dict["img_path"].append(img_path)
                     data_dict["annotation"].append("")
+                    print(data_dict)
 
 
 
