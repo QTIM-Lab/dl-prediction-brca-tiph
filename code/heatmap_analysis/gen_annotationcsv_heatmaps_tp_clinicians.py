@@ -46,8 +46,10 @@ if __name__ == '__main__':
         "set":list(),
         "img":list(),
         "img_path":list(),
-        "annotation":list()
+        "annotation":list(),
+        "gt_annotation":list()
     }
+
 
     # Open the task directory
     task_dir = os.path.join(args.clinicians_dir, args.task)
@@ -71,6 +73,14 @@ if __name__ == '__main__':
             set_dirs = os.listdir(wsi_dir_)
             set_dirs = [d for d in set_dirs if os.path.isdir(os.path.join(wsi_dir_, d))]
 
+            # Get the set mapping gt
+            set_gt = pd.read_csv(
+                os.path.join(args.researchers_dir, args.task, label, wsi, 'gt_file.csv')
+            )
+            set_get_dict = dict()
+            for r_idx, row in set_gt.iterrows():
+                set_get_dict[row["folders"]] = row["annotations"]
+
             # Go through set directories
             for set_ in set_dirs:
                 set_dir_ = os.path.join(wsi_dir_, set_)
@@ -92,7 +102,7 @@ if __name__ == '__main__':
                     data_dict["img"].append(img)
                     data_dict["img_path"].append(img_path)
                     data_dict["annotation"].append("")
-                    # print(data_dict)
+                    data_dict["gt_annotation"].append(set_get_dict[set_])
 
 
 
