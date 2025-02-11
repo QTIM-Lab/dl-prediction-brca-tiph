@@ -1,4 +1,22 @@
 #!/bin/bash
+#SBATCH --account=qtim
+#SBATCH --partition=rtx6000,rtx8000
+#SBATCH --gpus=1
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=15
+#SBATCH --mem=120G
+#SBATCH --time=7-00:00:00
+#SBATCH --job-name=chpa         # Job name
+#SBATCH -o chpa.out             # STDOUT
+#SBATCH -e chpa.err             # STDERR
+#SBATCH -M all
+#SBATCH --mail-type=ALL
+
+
+export PYENV_VERSION=mmxbrcp
+export LD_LIBRARY_PATH="/autofs/space/crater_001/tools/usr/lib64:${LD_LIBRARY_PATH}"
+
 
 echo 'Started CLAM (create_heatmaps_fp.py) on TCGA-BRCA Database.'
 
@@ -22,9 +40,14 @@ echo 'Started CLAM (create_heatmaps_fp.py) on TCGA-BRCA Database.'
 
 
 # T-Cell Cytotoxicity, Angiogenesis, Epithelial-Mesenchymal Transition
-CHECKPOINT_DIRS=('/autofs/space/crater_001/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/gobp_t_cell_mediated_cytotoxicity/2024-04-25_21-05-55' \
- '/autofs/space/crater_001/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_angiogenesis/2024-04-25_09-13-05' \
+# CHECKPOINT_DIRS=('/autofs/space/crater_001/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/gobp_t_cell_mediated_cytotoxicity/2024-04-25_21-05-55' \
+ # '/autofs/space/crater_001/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_angiogenesis/2024-04-25_09-13-05' \
+ # '/autofs/space/crater_001/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_epithelial_mesenchymal_transition/2024-04-25_11-05-38')
+
+# Angiogenesis, Epithelial-Mesenchymal Transition
+CHECKPOINT_DIRS=('/autofs/space/crater_001/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_angiogenesis/2024-04-25_09-13-05' \
  '/autofs/space/crater_001/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_epithelial_mesenchymal_transition/2024-04-25_11-05-38')
+
 
 
 for checkpoint_dir in "${CHECKPOINT_DIRS[@]}"
