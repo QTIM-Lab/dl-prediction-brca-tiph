@@ -590,21 +590,25 @@ def inference_pipeline(test_set, config_json, device, checkpoint_dir, fold):
     for _, input_data_dict in enumerate(test_loader):
 
         if task_type == "classification":
-            features, ssgsea_scores = input_data_dict['features'].to(device), input_data_dict['ssgsea_scores'].to(device)
+            case_id, svs_path, features, ssgsea_scores = input_data_dict["case_id"], input_data_dict["svs_path"], input_data_dict['features'].to(device), input_data_dict['ssgsea_scores'].to(device)
             output_dict = model(features)
             logits, y_pred, y_proba = output_dict['logits'], output_dict['y_pred'], output_dict["y_proba"]
             test_y_pred_c.extend(list(logits.cpu().detach().numpy()))
             test_y_pred.extend(list(y_pred.cpu().detach().numpy()))
             test_y.extend(list(ssgsea_scores.cpu().detach().numpy()))
             test_y_pred_proba.extend(list(y_proba.detach().numpy()))
+            test_case_ids.extend(list(case_id.cpu().detach().numpy()))
+            test_svs_paths.extend(list(svs_path.cpu().detach().numpy))
         
         elif task_type == "clinical_subtype_classification":
-            features, c_subtypes = input_data_dict['features'].to(device), input_data_dict['c_subtype_label'].to(device)
+            case_id, svs_path, features, c_subtypes = input_data_dict["case_id"], input_data_dict["svs_path"], input_data_dict['features'].to(device), input_data_dict['c_subtype_label'].to(device)
             output_dict = model(features)
             logits, y_pred, y_proba = output_dict['logits'], output_dict['y_pred'], output_dict['y_proba']
             test_y_pred.extend(list(y_pred.cpu().detach().numpy()))
             test_y.extend(list(c_subtypes.cpu().detach().numpy()))
             test_y_pred_proba.extend(list(y_proba.cpu().detach().numpy()))
+            test_case_ids.extend(list(case_id.cpu().detach().numpy()))
+            test_svs_paths.extend(list(svs_path.cpu().detach().numpy))
 
         elif task_type == "regression":
             case_id, svs_path, features, ssgsea_scores, ssgsea_scores_bin = input_data_dict["case_id"], input_data_dict["svs_path"], input_data_dict["features"].to(device), input_data_dict["ssgsea_scores"].to(device), input_data_dict["ssgsea_scores_bin"].to(device)
