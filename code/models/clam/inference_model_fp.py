@@ -143,15 +143,17 @@ if __name__ == "__main__":
 
 
         # Perform model inference
-        test_inference_dict = inference_pipeline(
-            test_set=test_set,
-            config_json=config_json,
-            device=device,
-            checkpoint_dir=args.checkpoint_dir,
-            fold=fold
-        )
+        # Train, Validation and Test
+        for split_set, split_set_name in zip([train_set, val_set, test_set], ["train", "val", "test"]):
+            test_inference_dict = inference_pipeline(
+                test_set=split_set,
+                config_json=config_json,
+                device=device,
+                checkpoint_dir=args.checkpoint_dir,
+                fold=fold
+            )
 
-        # Convert test metrics into a dataframe
-        test_inference_df = pd.DataFrame.from_dict(test_inference_dict)
-        test_inference_df.to_csv(os.path.join(args.checkpoint_dir, f"test_inference_kf{fold}.csv"))
-        print(test_inference_df)
+            # Convert test metrics into a dataframe
+            test_inference_df = pd.DataFrame.from_dict(test_inference_dict)
+            test_inference_df.to_csv(os.path.join(args.checkpoint_dir, f"{split_set_name}_inference_kf{fold}.csv"))
+            # print(test_inference_df)
