@@ -11,7 +11,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='CLAM: Heatmap Generation (for Clinical Study).')
     parser.add_argument('--clinicians_dir', type=str, required=True, help="The directory where we will save these studies for the clinicians.")
     parser.add_argument('--researchers_dir', type=str, required=True, help="The directory where we will save these studies for the researchers.")
-    parser.add_argument('--task', type=str, required=True, choices=["b_cell_proliferation", "t_cell_mediated_cytotoxicity"], help="The annotation file will be generated to this task.")
+    parser.add_argument('--task', type=str, required=True, choices=["b_cell_proliferation", "t_cell_mediated_cytotoxicity", "angiogenesis", "epithelial_mesenchymal_transition"], help="The annotation file will be generated to this task.")
     parser.add_argument('--verbose', action="store_true", help="Print execution information.")
     args = parser.parse_args()
 
