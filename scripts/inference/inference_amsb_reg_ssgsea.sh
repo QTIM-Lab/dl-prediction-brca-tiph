@@ -6,6 +6,7 @@ echo 'Started CLAM Testing on TCGA-BRCA Database.'
 
 
 # List of checkpoint directories for AM-SB and AM-MB (CONCH Features)
+# These are Dago's Augmented Features Models
 CHECKPOINT_DIRS=('/autofs/space/crater_001/projects/micropath/results/augmented/gobp_b_cell_proliferation/2025-02-10_11-33-37' \
  '/autofs/space/crater_001/projects/micropath/results/augmented/gobp_t_cell_mediated_cytotoxicity/2025-02-10_12-57-08' \
  '/autofs/space/crater_001/projects/micropath/results/augmented/hallmark_angiogenesis/2025-02-10_13-23-05' \
