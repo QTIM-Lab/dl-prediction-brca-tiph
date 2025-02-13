@@ -24,7 +24,7 @@ do
     echo "Checkpoint: $checkpoint_dir"
     
     # CONCH Features
-    python code/models/clam/test_model_fp.py \
+    python code/models/clam/inference_model_fp.py \
     --gpu_id 0 \
     --checkpoint_dir $checkpoint_dir \
     --dataset 'TCGA-BRCA' \
