@@ -597,8 +597,8 @@ def inference_pipeline(test_set, config_json, device, checkpoint_dir, fold):
             test_y_pred.extend(list(y_pred.cpu().detach().numpy()))
             test_y.extend(list(ssgsea_scores.cpu().detach().numpy()))
             test_y_pred_proba.extend(list(y_proba.detach().numpy()))
-            test_case_ids.extend(list(case_id.cpu().detach().numpy()))
-            test_svs_paths.extend(list(svs_path.cpu().detach().numpy))
+            test_case_ids.extend(case_id)
+            test_svs_paths.extend(svs_path)
         
         elif task_type == "clinical_subtype_classification":
             case_id, svs_path, features, c_subtypes = input_data_dict["case_id"], input_data_dict["svs_path"], input_data_dict['features'].to(device), input_data_dict['c_subtype_label'].to(device)
@@ -607,8 +607,8 @@ def inference_pipeline(test_set, config_json, device, checkpoint_dir, fold):
             test_y_pred.extend(list(y_pred.cpu().detach().numpy()))
             test_y.extend(list(c_subtypes.cpu().detach().numpy()))
             test_y_pred_proba.extend(list(y_proba.cpu().detach().numpy()))
-            test_case_ids.extend(list(case_id.cpu().detach().numpy()))
-            test_svs_paths.extend(list(svs_path.cpu().detach().numpy))
+            test_case_ids.extend(case_id)
+            test_svs_paths.extend(svs_path)
 
         elif task_type == "regression":
             case_id, svs_path, features, ssgsea_scores, ssgsea_scores_bin = input_data_dict["case_id"], input_data_dict["svs_path"], input_data_dict["features"].to(device), input_data_dict["ssgsea_scores"].to(device), input_data_dict["ssgsea_scores_bin"].to(device)
@@ -621,8 +621,8 @@ def inference_pipeline(test_set, config_json, device, checkpoint_dir, fold):
             test_y.extend(list(ssgsea_scores_bin.cpu().detach().numpy()))
             test_y_c.extend(list(ssgsea_scores.cpu().detach().numpy()))
             test_y_pred_proba.extend(list(y_pred_proba.squeeze(0).cpu().detach().numpy()))
-            test_case_ids.extend(list(case_id.cpu().detach().numpy()))
-            test_svs_paths.extend(list(svs_path.cpu().detach().numpy))
+            test_case_ids.extend(case_id)
+            test_svs_paths.extend(svs_path)
 
 
 
