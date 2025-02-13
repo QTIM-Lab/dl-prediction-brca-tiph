@@ -502,6 +502,142 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
 
 
 
+# Function: Inference Model Pipeline
+def inference_pipeline(test_set, config_json, device, checkpoint_dir, fold):
+
+    # Load the parameters from the configuration JSON
+    n_classes = config_json["data"]["n_classes"]
+    dropout = config_json["hyperparameters"]["dropout"]
+    dropout_prob = config_json["hyperparameters"]["dropout_prob"]
+    model_size = config_json["hyperparameters"]["model_size"]
+    model_type = config_json["hyperparameters"]["model_type"]
+    verbose = config_json["verbose"]
+    num_workers = config_json["data"]["num_workers"]
+    pin_memory = config_json["data"]["pin_memory"]
+    encoding_size = config_json['data']['encoding_size']
+    features_ = config_json["features"]
+    task_type = config_json["task_type"]
+
+
+    # Dictionary with model settings for the initialization of the model object
+    if task_type in ("classification", "clinical_subtype_classification"):
+        model_dict = {
+            "dropout":dropout,
+            "dropout_prob":dropout_prob,
+            'n_classes':n_classes,
+            "encoding_size":encoding_size
+        }
+    elif task_type == "regression":
+        model_dict = {
+            "dropout":dropout,
+            "dropout_prob":dropout_prob,
+            "encoding_size":encoding_size
+        }
+    
+
+    # Adapted from the CLAM framework
+    assert model_size is not None, "Please define a model size."
+    
+    model_dict.update({"size_arg": model_size})
+    
+    # AM-SB
+    if task_type in ("classification", "clinical_subtype_classification"):
+        if model_type == 'am_sb':
+            model = AM_SB(**model_dict)
+        elif model_type == 'am_mb':
+            model = AM_MB(**model_dict)
+    elif task_type == "regression":
+        if model_type == 'am_sb':
+            model = AM_SB_Regression(**model_dict)
+
+    if verbose:
+        print(f"Using features: {features_}")
+        summary(model)
+
+
+    # Create DataLoaders 
+    # FIXME: The code is currently optimized for batch_size == 1)
+    test_loader = DataLoader(
+        dataset=test_set,
+        batch_size=1,
+        shuffle=False,
+        num_workers=num_workers,
+        pin_memory=pin_memory
+    )
+
+    # Load model checkpoint
+    model.load_state_dict(torch.load(os.path.join(checkpoint_dir, f"best_model_kf{fold}.pt"), map_location=device))
+    model.to(device)
+
+    # Put model into evaluation 
+    model.eval()
+
+    # Initialize variables to track values
+    test_y_pred = list()
+    test_y_pred_proba = list()
+    test_y = list()
+
+    # Initialize variables 
+    test_case_ids = list()
+    test_svs_paths = list()
+    test_y_pred = list()
+    test_y_pred_proba = list()
+    test_y_pred_c = list()
+    test_y = list()
+    test_y_c = list()
+
+    # Get batch of data
+    for _, input_data_dict in enumerate(test_loader):
+
+        if task_type == "classification":
+            features, ssgsea_scores = input_data_dict['features'].to(device), input_data_dict['ssgsea_scores'].to(device)
+            output_dict = model(features)
+            logits, y_pred, y_proba = output_dict['logits'], output_dict['y_pred'], output_dict["y_proba"]
+            test_y_pred_c.extend(list(logits.cpu().detach().numpy()))
+            test_y_pred.extend(list(y_pred.cpu().detach().numpy()))
+            test_y.extend(list(ssgsea_scores.cpu().detach().numpy()))
+            test_y_pred_proba.extend(list(y_proba.detach().numpy()))
+        
+        elif task_type == "clinical_subtype_classification":
+            features, c_subtypes = input_data_dict['features'].to(device), input_data_dict['c_subtype_label'].to(device)
+            output_dict = model(features)
+            logits, y_pred, y_proba = output_dict['logits'], output_dict['y_pred'], output_dict['y_proba']
+            test_y_pred.extend(list(y_pred.cpu().detach().numpy()))
+            test_y.extend(list(c_subtypes.cpu().detach().numpy()))
+            test_y_pred_proba.extend(list(y_proba.cpu().detach().numpy()))
+
+        elif task_type == "regression":
+            case_id, svs_path, features, ssgsea_scores, ssgsea_scores_bin = input_data_dict["case_id"], input_data_dict["svs_path"], input_data_dict["features"].to(device), input_data_dict["ssgsea_scores"].to(device), input_data_dict["ssgsea_scores_bin"].to(device)
+            output_dict = model(features)
+            logits = output_dict['logits']
+            y_pred = torch.where(logits > 0, 1.0, 0.0)
+            y_pred_proba = F.sigmoid(logits)
+            test_y_pred_c.extend(list(logits.squeeze(0).cpu().detach().numpy()))
+            test_y_pred.extend(list(y_pred.squeeze(0).cpu().detach().numpy()))
+            test_y.extend(list(ssgsea_scores_bin.cpu().detach().numpy()))
+            test_y_c.extend(list(ssgsea_scores.cpu().detach().numpy()))
+            test_y_pred_proba.extend(list(y_pred_proba.squeeze(0).cpu().detach().numpy()))
+            test_case_ids.extend(list(case_id.cpu().detach().numpy()))
+            test_svs_paths.extend(list(svs_path.cpu().detach().numpy))
+
+
+
+        # Create a test inference dictionary
+        test_inference_dict = {
+            "case_id":test_case_ids,
+            "svs_path":test_svs_paths,
+            "test_y":test_y,
+            "test_y_c":test_y_c,
+            "test_y_pred":test_y_pred,
+            "test_y_pred_c":test_y_pred_c,
+            "test_y_pred_proba":test_y_pred_proba
+        }
+
+
+    return test_inference_dict
+
+
+
 # Function: Train Loop for CLAM
 def train_loop_clam(epoch, model, loader, optimizer, n_classes, task_type, loss_fn, device, wandb_run):
 
