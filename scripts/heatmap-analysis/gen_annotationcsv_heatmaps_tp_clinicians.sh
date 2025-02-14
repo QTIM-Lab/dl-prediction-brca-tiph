@@ -4,7 +4,6 @@ echo 'Generating Global Annotation CSV file...'
 
 
 
-
 # All Tasks
 # TASKS=('b_cell_proliferation' \
 #  't_cell_mediated_cytotoxicity' \
@@ -18,13 +17,10 @@ echo 'Generating Global Annotation CSV file...'
 # TASKS=('t_cell_mediated_cytotoxicity')
 
 # Angiogenesis
-TASKS=('angiogenesis')
+# TASKS=('angiogenesis')
 
-
-# T-Cell Cytotoxicity, Angiogenesis, Epithelial-Mesenchymal Transition
-# CHECKPOINT_DIRS=(
- # 
- # '/autofs/space/crater_001/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/All/checkpoints/hallmark_epithelial_mesenchymal_transition/2024-04-25_11-05-38')
+# Epithelial Mesenchymal Transition
+TASKS=('epithelial_mesenchymal_transition')
 
 
 
