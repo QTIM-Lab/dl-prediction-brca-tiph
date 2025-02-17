@@ -45,14 +45,14 @@ def load_tcga_brca_ssgsea_scores(base_data_path):
     df = pd.read_csv(os.path.join(base_data_path, 'Annotations', 'TCGA_BRCA_ssGSEA_Scores.csv'))
     
     # Create a data dictionary
-    sgsea_scores_dict = dict()
+    ssgsea_scores_dict = dict()
     for col_name in list(df.columns):
         if col_name == 'Unnamed: 0':
-            sgsea_scores_dict['label_names'] = df['Unnamed: 0'].values
+            ssgsea_scores_dict['label_names'] = df['Unnamed: 0'].values
         else:
-            sgsea_scores_dict[col_name] = df[col_name].values
+            ssgsea_scores_dict[col_name] = df[col_name].values
 
-    return sgsea_scores_dict
+    return ssgsea_scores_dict
 
 
 
@@ -82,4 +82,4 @@ if __name__ == "__main__":
     ssgsea_scores_label_idx_dict, ssgsea_scores_idx_label_dict = ssgsea_scores_label_idx_dict, ssgsea_scores_idx_label_dict
 
 
-    print(ssgsea_scores_dict)
+    print(ssgsea_scores_dict['label_names'])
