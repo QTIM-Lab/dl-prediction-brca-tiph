@@ -96,4 +96,10 @@ if __name__ == "__main__":
     # Create two NumPy arrays to gather this data
     data_arr = np.zeros((len(ssgsea_scores_dict.keys())-1, len(label_names)))
     data_arr_bin = np.zeros_like(data_arr)
-    print(data_arr.shape, data_arr_bin.shape)
+    
+    # Go through our dataset
+    wsi_idx = 0
+    for k, v in ssgsea_scores_dict.items():
+        if k not in ('label_names'):
+            print(v)
+            exit()
