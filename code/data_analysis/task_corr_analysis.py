@@ -82,4 +82,16 @@ if __name__ == "__main__":
     ssgsea_scores_label_idx_dict, ssgsea_scores_idx_label_dict = ssgsea_scores_label_idx_dict, ssgsea_scores_idx_label_dict
 
 
-    print(ssgsea_scores_dict['label_names'])
+
+    # Pos. Correlation between B-Cell Proliferation, T-Cell Cytotoxicity, Antigen Processing and Presentation
+    # Neg. Correlation between Immunosuppression
+    # Get task names
+    label_names = [
+        'gobp_b_cell_proliferation', 
+        'gobp_t_cell_mediated_cytotoxicity', 
+        'kegg_antigen_processing_and_presentation', 
+        'immunosuppression'
+    ]
+
+    # Create two NumPy arrays to gather this data
+    print(len(ssgsea_scores_dict.keys()))
