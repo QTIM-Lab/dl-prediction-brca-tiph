@@ -94,4 +94,6 @@ if __name__ == "__main__":
     ]
 
     # Create two NumPy arrays to gather this data
-    print(len(ssgsea_scores_dict.keys()))
+    data_arr = np.zeros((len(ssgsea_scores_dict.keys())-1, len(label_names)))
+    data_arr_bin = np.zeros_like(data_arr)
+    print(data_arr.shape, data_arr_bin.shape)
