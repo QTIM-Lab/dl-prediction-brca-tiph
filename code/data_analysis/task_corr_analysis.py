@@ -107,4 +107,4 @@ if __name__ == "__main__":
                 data_arr_bin[wsi_idx, l_idx] = 1 if s > 0 else 0
             wsi_idx += 1
     
-    print(data_arr)
+    print(data_arr_bin)
