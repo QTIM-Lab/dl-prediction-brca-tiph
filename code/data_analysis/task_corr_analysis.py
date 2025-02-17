@@ -101,5 +101,10 @@ if __name__ == "__main__":
     wsi_idx = 0
     for k, v in ssgsea_scores_dict.items():
         if k not in ('label_names'):
-            print(v)
-            exit()
+            for l_idx, ln in enumerate(label_names):
+                s = v[ssgsea_scores_label_idx_dict[ln]]
+                data_arr[wsi_idx, l_idx] = s
+                data_arr_bin[wsi_idx, l_idx] = 1 if s > 0 else 0
+            wsi_idx += 1
+    
+    print(data_arr)
