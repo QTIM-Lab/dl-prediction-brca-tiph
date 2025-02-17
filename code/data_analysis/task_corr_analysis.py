@@ -112,7 +112,7 @@ if __name__ == "__main__":
     data_corrmatx = data_df.corr()
     sns.heatmap(data_corrmatx, cmap="Greens", annot=True)
     plt.savefig(
-         fname=os.path.join('results/data_analysis', f"task_corr_analysis.png"),
+         fname=os.path.join(f"task_corr_analysis.png"),
          bbox_inches='tight'
     )
     plt.clf()
@@ -124,7 +124,7 @@ if __name__ == "__main__":
     data_corrmatx = data_df.corr()
     sns.heatmap(data_corrmatx, cmap="Greens", annot=True)
     plt.savefig(
-         fname=os.path.join('results/data_analysis', f"task_corr_bin_analysis.png"),
+         fname=os.path.join(f"task_corr_bin_analysis.png"),
          bbox_inches='tight'
     )
     plt.clf()
