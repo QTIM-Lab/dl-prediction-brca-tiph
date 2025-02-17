@@ -112,5 +112,5 @@ if __name__ == "__main__":
     sns.heatmap(data_corrmatx, cmap="Greens", annot=True)
     print(data_corrmatx)
 
-    print(np.corrcoef(data_arr))
-    print(np.corrcoef(data_arr_bin))
+    print(np.corrcoef(data_arr, rowvar=True))
+    print(np.corrcoef(data_arr_bin, rowvar=True))
