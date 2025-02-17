@@ -5,11 +5,8 @@ import argparse
 import pandas as pd
 import numpy as np
 import random
-import json
-import copy
 import matplotlib.pyplot as plt
-
-# PyTorch Imports
+import seaborn as sns
 import torch
 
 
@@ -107,4 +104,10 @@ if __name__ == "__main__":
                 data_arr_bin[wsi_idx, l_idx] = 1 if s > 0 else 0
             wsi_idx += 1
     
-    print(data_arr_bin)
+    
+    
+    # Create a DataFrame to compute co-correlation matrix
+    data_df = pd.DataFrame(data=data_arr_bin, columns=label_names)
+    data_corrmatx = data_df.corr()
+    sns.heatmap(data_corrmatx, cmap="Greens", annot=True)
+    print(data_corrmatx)
