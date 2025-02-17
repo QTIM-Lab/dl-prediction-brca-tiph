@@ -107,8 +107,25 @@ if __name__ == "__main__":
     
     
     # Create a DataFrame to compute co-correlation matrix
+    # Using continuous data
     data_df = pd.DataFrame(data=data_arr, columns=label_names)
-    print(data_df)
     data_corrmatx = data_df.corr()
     sns.heatmap(data_corrmatx, cmap="Greens", annot=True)
-    print(data_corrmatx)
+    plt.savefig(
+         fname=os.path.join('results/data_analysis', f"task_corr_analysis.png"),
+         bbox_inches='tight'
+    )
+    plt.clf()
+    plt.close()
+
+
+    # Using binary data
+    data_df = pd.DataFrame(data=data_arr_bin, columns=label_names)
+    data_corrmatx = data_df.corr()
+    sns.heatmap(data_corrmatx, cmap="Greens", annot=True)
+    plt.savefig(
+         fname=os.path.join('results/data_analysis', f"task_corr_bin_analysis.png"),
+         bbox_inches='tight'
+    )
+    plt.clf()
+    plt.close()
