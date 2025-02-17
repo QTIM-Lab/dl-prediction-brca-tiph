@@ -108,9 +108,7 @@ if __name__ == "__main__":
     
     # Create a DataFrame to compute co-correlation matrix
     data_df = pd.DataFrame(data=data_arr, columns=label_names)
+    print(data_df)
     data_corrmatx = data_df.corr()
     sns.heatmap(data_corrmatx, cmap="Greens", annot=True)
     print(data_corrmatx)
-
-    print(np.corrcoef(data_arr, rowvar=True))
-    print(np.corrcoef(data_arr_bin, rowvar=True))
