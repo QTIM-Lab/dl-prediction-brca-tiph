@@ -90,7 +90,7 @@ def wsi_stats(base_data_path=None, **kwargs):
     # Go through the dataset
     magnifications = list()
     for idx, wsi_path in enumerate(slides):
-        print(f"Index: {idx}, WSI Path: {os.path.join(base_data_path, wsi_path)}")
+        # print(f"Index: {idx}, WSI Path: {os.path.join(base_data_path, wsi_path)}")
         # print(wsi_path)
 
 
@@ -114,6 +114,17 @@ def wsi_stats(base_data_path=None, **kwargs):
         # lvl_downsamples = wsi_.level_downsamples
         # print(f"Level downsamples: {lvl_downsamples}")
     print(f"Max Magn.: {np.max(magnifications)} | Min Mag.: {np.min(magnifications)}")
+    # Max Magn.: 40.0 | Min Mag.: 20.0
+
+    m_20, m_40 = 0, 0
+    for m in magnifications:
+        if int(m) == 40:
+            m_40 += 1
+        elif int(m) == 20:
+            m_20 += 1
+        else:
+            print("Outlier: ", m)
+    print(f"{(m_40/len(magnifications))*100}% of 40x WSIs | {(m_20/len(magnifications))*100}% of 20x WSIs")
 
     return
 
