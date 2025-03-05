@@ -76,11 +76,7 @@ if __name__ == '__main__':
     # CLI
     parser = argparse.ArgumentParser(description='WSI Colour Analysis.')
     parser.add_argument('--features_h5_dir', nargs='+', type=str, required=True, help="The directory of the features in .pt format for the TCGA-BRCA dataset.")
-    parser.add_argument('--custom_downsample', type=int, default=1)
-    parser.add_argument('--target_patch_size', type=int, default=-1)
     parser.add_argument('--verbose', default=False, action='store_true')
-    parser.add_argument('--num_workers', type=int, help="The <num_workers> argument for the dataloader.")
-    parser.add_argument('--pin_memory', action='store_true', help="The <pin_memory> argument for the dataloader.")
     args = parser.parse_args()
 
 
@@ -112,7 +108,7 @@ if __name__ == '__main__':
             
             # Get the .h5 file
             bag_name = slide_id+'.h5'
-            h5_file_path = os.path.join(args.data_h5_dir, 'patches', bag_name)
+            h5_file_path = os.path.join(p, 'patches', bag_name)
             # print(h5_file_path)
             assert os.path.exists(h5_file_path)
             
@@ -140,11 +136,7 @@ if __name__ == '__main__':
             r, g, b = wsi_colour(
                 file_path=h5_file_path,
                 wsi=wsi,
-                verbose=args.verbose,
-                custom_downsample=args.custom_downsample,
-                target_patch_size=args.target_patch_size,
-                num_workers=args.num_workers,
-                pin_memory=args.pin_memory
+                verbose=args.verbose
             )
 
 
