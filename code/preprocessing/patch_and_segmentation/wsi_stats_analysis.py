@@ -92,12 +92,12 @@ def wsi_stats(base_data_path=None, **kwargs):
     # Go through the dataset
     magnifications = list()
     for idx, wsi_path in enumerate(slides):
-        print(f"Index: {idx}, WSI Path: {os.path.join(source_dir, wsi_path)}")
+        print(f"Index: {idx}, WSI Path: {os.path.join(base_data_path, wsi_path)}")
         # print(wsi_path)
 
 
         # Inialize WSI
-        WSI_object = WholeSlideImage(os.path.join(source_dir, wsi_path))
+        WSI_object = WholeSlideImage(os.path.join(base_data_path, wsi_path))
         wsi_ = WSI_object.getOpenSlide()
         wsi_properties = dict(wsi_.properties)
         print(wsi_properties)
