@@ -43,10 +43,10 @@ def get_tcgabrca_folders_and_svs_fpaths(base_data_path):
 
 
 # Function: WSI Stats
-def wsi_stats(source_dir=None, **kwargs):
+def wsi_stats(base_data_path=None, **kwargs):
 
     # Create conditionals according to the use case
-    slides = get_tcgabrca_folders_and_svs_fpaths(base_data_path=source_dir)
+    slides = get_tcgabrca_folders_and_svs_fpaths(base_data_path=base_data_path)
     # Example WSI path
     # /autofs/cluster/qtim/datasets/public/TCGA-BRCA/WSI/8f936d42-6deb-43a5-995b-4af18e6a2462/TCGA-A2-A0EY-01Z-00-DX1.2F2428B3-0767-48E0-AC22-443C244CBD16.svs
     
@@ -132,7 +132,7 @@ if __name__ == '__main__':
 
     # Perform segmentation and patching
     wsi_stats(
-        source_dir=args.source_dir,
+        base_data_path=args.base_data_path,
         use_histoqc_quality_file=args.use_histoqc_quality_file if args.use_histoqc_quality_file else None,
         verbose=args.verbose if args.verbose else False
     )
