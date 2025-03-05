@@ -101,9 +101,12 @@ def wsi_stats(base_data_path=None, **kwargs):
         # print(wsi_properties)
         
         # Get magnification
-        mag = wsi_properties['openslide.objective-power']
-        # print(mag, float(mag))
-        magnifications.append(float(mag))
+        try:
+            mag = wsi_properties['openslide.objective-power']
+            # print(mag, float(mag))
+            magnifications.append(float(mag))
+        except:
+            print(wsi_properties)
 
         # Get level count and downsamples
         # lvl_count = wsi_.level_count
