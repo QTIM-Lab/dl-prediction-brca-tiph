@@ -51,8 +51,6 @@ def wsi_stats(base_data_path=None, **kwargs):
     # /autofs/cluster/qtim/datasets/public/TCGA-BRCA/WSI/8f936d42-6deb-43a5-995b-4af18e6a2462/TCGA-A2-A0EY-01Z-00-DX1.2F2428B3-0767-48E0-AC22-443C244CBD16.svs
     
 
-
-
     # HistoQC: Quality Assessment of WSI
     hqc_q = None
     if 'use_histoqc_quality_file' in kwargs.keys():
@@ -100,20 +98,19 @@ def wsi_stats(base_data_path=None, **kwargs):
         WSI_object = WholeSlideImage(os.path.join(base_data_path, wsi_path))
         wsi_ = WSI_object.getOpenSlide()
         wsi_properties = dict(wsi_.properties)
-        print(wsi_properties)
+        # print(wsi_properties)
         
         # Get magnification
-        # mag = NOT AVAILABLE
+        mag = wsi_properties['openslide.objective-power']
         # print(mag, float(mag))
-        # magnifications.append(float(mag))
-        # We used QuPath: 40X mag!
+        magnifications.append(float(mag))
 
         # Get level count and downsamples
-        lvl_count = wsi_.level_count
-        print(f"Level count: {lvl_count}")
-
-        lvl_downsamples = wsi_.level_downsamples
-        print(f"Level downsamples: {lvl_downsamples}")
+        # lvl_count = wsi_.level_count
+        # print(f"Level count: {lvl_count}")
+        # lvl_downsamples = wsi_.level_downsamples
+        # print(f"Level downsamples: {lvl_downsamples}")
+    print(f"Max Magn.: {np.max(magnifications)} | Min Mag.: {np.min(magnifications)}")
 
     return
 
