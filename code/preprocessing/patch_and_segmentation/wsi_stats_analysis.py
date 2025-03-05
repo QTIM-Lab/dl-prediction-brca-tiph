@@ -125,6 +125,7 @@ def wsi_stats(base_data_path=None, **kwargs):
         else:
             print("Outlier: ", m)
     print(f"{(m_40/len(magnifications))*100}% of 40x WSIs | {(m_20/len(magnifications))*100}% of 20x WSIs")
+    # 90.57572423909058% of 40x WSIs | 9.424275760909424% of 20x WSIs
 
     return
 

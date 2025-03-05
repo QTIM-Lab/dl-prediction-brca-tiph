@@ -1,0 +1,13 @@
+#!/bin/bash
+
+
+
+python code/preprocessing/patch_and_segmentation/wsi_colour_analysis.py \
+ --base_data_path '/autofs/space/crater_001/datasets/public/TCGA-BRCA' \
+ --use_histoqc_quality_file '/autofs/space/crater_001/projects/breast-cancer-pathology/results/HistoQC/TCGA-BRCA/mmxbrcp/hqc_quality_file.csv' \
+ --features_h5_dir '/autofs/space/crater_001/projects/breast-cancer-pathology/results/CONCH/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/features' '/autofs/space/crater_001/projects/breast-cancer-pathology/results/CONCH/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/features'
+ --verbose
+
+
+/autofs/space/crater_001/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/DiagnosticSlide/SegmentationHistoQC/process_list_autogen.csv
+/autofs/space/crater_001/projects/breast-cancer-pathology/results/CLAM/TCGA-BRCA/mmxbrcp/TissueSlide/SegmentationHistoQC/process_list_autogen.csv
