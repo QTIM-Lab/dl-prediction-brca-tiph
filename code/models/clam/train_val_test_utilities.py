@@ -5,16 +5,36 @@ import numpy as np
 # PyTorch Imports
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchinfo import summary
 
+# TorchMetrics Imports
+from torchmetrics.functional.classification import (
+    accuracy,
+    f1_score,
+    recall,
+    precision,
+    auroc
+)
+from torchmetrics.functional.regression import (
+    mean_absolute_error,
+    mean_squared_error,
+    concordance_corrcoef,
+    kendall_rank_corrcoef,
+    pearson_corrcoef,
+    r2_score,
+    relative_squared_error,
+    spearman_corrcoef
+)
+
 # Sklearn Imports
-from sklearn.preprocessing import label_binarize
-from sklearn.metrics import roc_auc_score, roc_curve, auc, accuracy_score
+# from sklearn.preprocessing import label_binarize
+# from sklearn.metrics import roc_auc_score, roc_curve, auc, accuracy_score
 
 # Project Imports
-from model_utilities import AM_SB, AM_MB
+from model_utilities import AM_SB, AM_MB, AM_SB_Regression
 
 # WandB Imports
 import wandb
@@ -30,46 +50,6 @@ def get_optim(model, optimizer, lr, weight_decay):
     else:
         raise NotImplementedError
     return optimizer
-
-
-
-# Function: Compute prediction error
-def compute_prediction_error(y_pred, y):
-	error = 1. - y_pred.float().eq(y.float()).float().mean().item()
-
-	return error
-
-
-
-# Function: Compute class accuracy
-def compute_class_acc(data, n_classes):
-
-    # Create dictionaries to save metrics
-    acc_dict, correct_dict, count_dict = dict(), dict(), dict()
-    
-    # Go through all classes
-    for c in range(n_classes):
-
-        # Get counts
-        count = data[c]["count"]
-
-        # Get correct counts
-        correct = data[c]["correct"]
-
-        # Compute accuracy
-        if count == 0: 
-            acc = None
-        else:
-            acc = float(correct) / count
-        
-
-        # Add these data to the dictionaries
-        acc_dict[c] = acc
-        correct_dict[c] = correct
-        count_dict[c] = count
-
-
-    return acc_dict, correct_dict, count_dict
 
 
 
@@ -90,9 +70,9 @@ def train_val_pipeline(datasets, config_json, device, experiment_dir, checkpoint
     pin_memory = config_json["data"]["pin_memory"]
     epochs = config_json["hyperparameters"]["epochs"]
     early_stopping = config_json["hyperparameters"]["early_stopping"]
-    loss = config_json["hyperparameters"]["loss"]
     encoding_size = config_json['data']['encoding_size']
     features_ = config_json["features"]
+    task_type = config_json["task_type"]
 
 
     # Build a configuration dictionary for WandB
@@ -110,14 +90,14 @@ def train_val_pipeline(datasets, config_json, device, experiment_dir, checkpoint
         "pin_memory":pin_memory,
         "epochs":epochs,
         "early_stopping":early_stopping,
-        "loss":loss,
         "encoding_size":encoding_size,
-        "features":features_
+        "features":features_,
+        "task_type":task_type
     }
 
     # Initialize WandB
     wandb_run = wandb.init(
-        project="mmodal-xai-brca-path",
+        project="dl-prediction-brca-tiph-ext",
         name=wandb_project_name,
         config=wandb_project_config
     )
@@ -129,17 +109,27 @@ def train_val_pipeline(datasets, config_json, device, experiment_dir, checkpoint
     train_set, val_set = datasets
 
 
-    # Get loss functionå
-    loss_fn = nn.CrossEntropyLoss()
+    # Get loss function
+    if task_type in ("classification", "clinical_subtype_classification"):
+        loss_fn = nn.CrossEntropyLoss()
+    elif task_type == "regression":
+        loss_fn = nn.MSELoss()
 
 
     # Dictionary with model settings for the initialization of the model object
-    model_dict = {
-        "dropout":dropout,
-        "dropout_prob":dropout_prob,
-        'n_classes':n_classes,
-        "encoding_size":encoding_size,
-    }
+    if task_type in ("classification", "clinical_subtype_classification"):
+        model_dict = {
+            "dropout":dropout,
+            "dropout_prob":dropout_prob,
+            'n_classes':n_classes,
+            "encoding_size":encoding_size
+        }
+    elif task_type == "regression":
+        model_dict = {
+            "dropout":dropout,
+            "dropout_prob":dropout_prob,
+            "encoding_size":encoding_size
+        }
     
 
     # Adapted from the CLAM framework
@@ -148,10 +138,14 @@ def train_val_pipeline(datasets, config_json, device, experiment_dir, checkpoint
     model_dict.update({"size_arg": model_size})
     
     # AM-SB
-    if model_type == 'am_sb':
-        model = AM_SB(**model_dict)
-    elif model_type == 'am_mb':
-        model = AM_MB(**model_dict)
+    if task_type in ("classification", "clinical_subtype_classification"):
+        if model_type == 'am_sb':
+            model = AM_SB(**model_dict)
+        elif model_type == 'am_mb':
+            model = AM_MB(**model_dict)
+    elif task_type == "regression":
+        if model_type == 'am_sb':
+            model = AM_SB_Regression(**model_dict)
     
 
     # Move into model into device
@@ -205,6 +199,7 @@ def train_val_pipeline(datasets, config_json, device, experiment_dir, checkpoint
             loader=train_loader, 
             optimizer=optimizer, 
             n_classes=n_classes,
+            task_type=task_type,
             loss_fn=loss_fn,
             device=device,
             wandb_run=wandb_run
@@ -213,6 +208,7 @@ def train_val_pipeline(datasets, config_json, device, experiment_dir, checkpoint
             model=model, 
             loader=val_loader, 
             n_classes=n_classes, 
+            task_type=task_type,
             tracking_params=tracking_params, 
             loss_fn=loss_fn, 
             experiment_dir=experiment_dir,
@@ -244,29 +240,39 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
     pin_memory = config_json["data"]["pin_memory"]
     encoding_size = config_json['data']['encoding_size']
     features_ = config_json["features"]
+    task_type = config_json["task_type"]
 
 
     # Dictionary with model settings for the initialization of the model object
-    model_dict = {
-        "dropout":dropout,
-        "dropout_prob":dropout_prob,
-        'n_classes':n_classes,
-        "encoding_size":encoding_size
-    }
+    if task_type in ("classification", "clinical_subtype_classification"):
+        model_dict = {
+            "dropout":dropout,
+            "dropout_prob":dropout_prob,
+            'n_classes':n_classes,
+            "encoding_size":encoding_size
+        }
+    elif task_type == "regression":
+        model_dict = {
+            "dropout":dropout,
+            "dropout_prob":dropout_prob,
+            "encoding_size":encoding_size
+        }
     
 
     # Adapted from the CLAM framework
     assert model_size is not None, "Please define a model size."
     
     model_dict.update({"size_arg": model_size})
-
-    if model_type == 'am_sb':
-        model = AM_SB(**model_dict)
-    elif model_type == 'am_mb':
-        model = AM_MB(**model_dict)
-
-    # Move into model into device
-    model.to(device=device)
+    
+    # AM-SB
+    if task_type in ("classification", "clinical_subtype_classification"):
+        if model_type == 'am_sb':
+            model = AM_SB(**model_dict)
+        elif model_type == 'am_mb':
+            model = AM_MB(**model_dict)
+    elif task_type == "regression":
+        if model_type == 'am_sb':
+            model = AM_SB_Regression(**model_dict)
 
     if verbose:
         print(f"Using features: {features_}")
@@ -285,139 +291,407 @@ def test_pipeline(test_set, config_json, device, checkpoint_dir, fold):
 
     # Load model checkpoint
     model.load_state_dict(torch.load(os.path.join(checkpoint_dir, f"best_model_kf{fold}.pt"), map_location=device))
-    
+    model.to(device)
 
     # Put model into evaluation 
     model.eval()
 
-    # Data dictionary to log step accuracies
-    data = [{"count": 0, "correct": 0} for _ in range(n_classes)]
-    
     # Initialize variables to track values
-    test_error = 0.
     test_y_pred = list()
-    test_y_pred_prob = list()
+    test_y_pred_proba = list()
     test_y = list()
 
     # Create a dictionary for test metrics
     test_metrics = dict()
 
 
-    # Go through data batches and get metric values
-    with torch.no_grad():
-        for _, input_data_dict in enumerate(test_loader):
-            features, ssgea_scores = input_data_dict['features'].to(device), input_data_dict['ssgsea_scores'].to(device)
+    # Initialize variables 
+    test_y_pred = list()
+    test_y_pred_proba = list()
+    test_y_pred_c = list()
+    test_y = list()
+    test_y_c = list()
+
+    # Get batch of data
+    for _, input_data_dict in enumerate(test_loader):
+
+        if task_type == "classification":
+            features, ssgsea_scores = input_data_dict['features'].to(device), input_data_dict['ssgsea_scores'].to(device)
             output_dict = model(features)
-            logits, y_pred_prob, y_pred = output_dict['logits'], output_dict['y_proba'], output_dict['y_pred'], 
-            
-            # Log step counts and correct counts
-            data[int(ssgea_scores)]["count"] += 1
-            data[int(ssgea_scores)]["correct"] += (int(y_pred) == int(ssgea_scores))
-
-            # Append predictions and labels into the corresponding lists
+            logits, y_pred, y_proba = output_dict['logits'], output_dict['y_pred'], output_dict["y_proba"]
+            test_y_pred_c.extend(list(logits.cpu().detach().numpy()))
             test_y_pred.extend(list(y_pred.cpu().detach().numpy()))
-            test_y.extend(list(ssgea_scores.cpu().detach().numpy()))
+            test_y.extend(list(ssgsea_scores.cpu().detach().numpy()))
+            test_y_pred_proba.extend(list(y_proba.detach().numpy()))
+        
+        elif task_type == "clinical_subtype_classification":
+            features, c_subtypes = input_data_dict['features'].to(device), input_data_dict['c_subtype_label'].to(device)
+            output_dict = model(features)
+            logits, y_pred, y_proba = output_dict['logits'], output_dict['y_pred'], output_dict['y_proba']
+            test_y_pred.extend(list(y_pred.cpu().detach().numpy()))
+            test_y.extend(list(c_subtypes.cpu().detach().numpy()))
+            test_y_pred_proba.extend(list(y_proba.cpu().detach().numpy()))
 
-            # Updated list of y_pred probabilities
-            test_y_pred_prob.append(y_pred_prob.cpu().numpy())
-
-            # Compute error and update it
-            error = compute_prediction_error(y_pred=y_pred, y=ssgea_scores)
-            test_error += error
-
-
-    # Updated final validation error
-    test_error /= len(test_loader)
-
-    # Append test error to the metrics
-    test_metrics["test_error"] = [test_error]
+        elif task_type == "regression":
+            features, ssgsea_scores, ssgsea_scores_bin = input_data_dict["features"].to(device), input_data_dict["ssgsea_scores"].to(device), input_data_dict["ssgsea_scores_bin"].to(device)
+            output_dict = model(features)
+            logits = output_dict['logits']
+            y_pred = torch.where(logits > 0, 1.0, 0.0)
+            y_pred_proba = F.sigmoid(logits)
+            test_y_pred_c.extend(list(logits.squeeze(0).cpu().detach().numpy()))
+            test_y_pred.extend(list(y_pred.squeeze(0).cpu().detach().numpy()))
+            test_y.extend(list(ssgsea_scores_bin.cpu().detach().numpy()))
+            test_y_c.extend(list(ssgsea_scores.cpu().detach().numpy()))
+            test_y_pred_proba.extend(list(y_pred_proba.squeeze(0).cpu().detach().numpy()))
 
 
-    # Compute Validation ROC AUC
+    # Compute metrics
+    test_y_pred = torch.from_numpy(np.array(test_y_pred))
+    test_y = torch.from_numpy(np.array(test_y))
+    test_y_pred_proba = torch.from_numpy(np.array(test_y_pred_proba))
+    if task_type == "regression":
+        test_y_pred_c = torch.from_numpy(np.array(test_y_pred_c))
+        test_y_c = torch.from_numpy(np.array(test_y_c))
+    elif task_type == "classification":
+        test_y_pred_c = torch.from_numpy(np.array(test_y_pred_c))
+
     if n_classes == 2:
+        if len(test_y_pred.shape) == 2:
+            test_y_pred = test_y_pred.squeeze()
+        
+        acc = accuracy(
+            preds=test_y_pred,
+            target=test_y,
+            task='binary'
+        )
 
-        # Convert lists to NumPy arrays and fix their shape(s)
-        test_y = np.array(test_y)
-        test_y_pred_prob = np.squeeze(np.array(test_y_pred_prob), axis=1)
+        f1 = f1_score(
+            preds=test_y_pred,
+            target=test_y,
+            task='binary'
+        )
 
-        # Compute the ROC AUC Score
-        test_auc = roc_auc_score(test_y, test_y_pred_prob[:, 1])
-        test_aucs = []
-    
+        rec = recall(
+            preds=test_y_pred,
+            target=test_y,
+            task='binary'
+        )
+
+        prec = precision(
+            preds=test_y_pred,
+            target=test_y,
+            task='binary'
+        )
+
+
+        # Note: Original implementation uses softmax for 2 classes, so we need to compute AUROC this way
+        if task_type == "classification":
+            auc = auroc(
+                preds=test_y_pred_c,
+                target=test_y,
+                num_classes=2,
+                task='multiclass'
+            )
+        else:
+            auc = auroc(
+                preds=test_y_pred_proba,
+                target=test_y,
+                task='binary'
+            )
+
     else:
-        test_aucs = []
-        binary_labels = label_binarize(test_y, classes=[i for i in range(n_classes)])
-        for class_idx in range(n_classes):
-            if class_idx in test_y:
-                fpr, tpr, _ = roc_curve(binary_labels[:, class_idx], test_y_pred_prob[:, class_idx])
-                test_aucs.append(auc(fpr, tpr))
-            else:
-                test_aucs.append(float('nan'))
+        acc = accuracy(
+            preds=test_y_pred,
+            target=test_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
 
-        test_auc = np.nanmean(np.array(test_aucs))
+        f1 = f1_score(
+            preds=test_y_pred,
+            target=test_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
+
+        rec = recall(
+            preds=test_y_pred,
+            target=test_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
+
+        prec = precision(
+            preds=test_y_pred,
+            target=test_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
+
+        auc = auroc(
+            preds=test_y_pred_proba,
+            target=test_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
     
+    if task_type == "regression":
+        mae = mean_absolute_error(
+            preds=test_y_pred_c,
+            target=test_y_c
+        )
+        
+        mse = mean_squared_error(
+            preds=test_y_pred_c,
+            target=test_y_c
+        )
+
+        ccc = concordance_corrcoef(
+            preds=test_y_pred_c,
+            target=test_y_c
+        )
+
+        krcc = kendall_rank_corrcoef(
+            preds=test_y_pred_c,
+            target=test_y_c
+        )
+
+        pcc = pearson_corrcoef(
+            preds=test_y_pred_c,
+            target=test_y_c
+        )
+
+        r2s = r2_score(
+            preds=test_y_pred_c,
+            target=test_y_c
+        )
+
+        rse = relative_squared_error(
+            preds=test_y_pred_c,
+            target=test_y_c
+        )
+
+        scc = spearman_corrcoef(
+            preds=test_y_pred_c,
+            target=test_y_c
+        )
+
+
 
     # Append test AUC to the test metrics
-    test_metrics["test_auc"] = [test_auc]
+    test_metrics["acc"] = [acc.item()]
+    test_metrics["f1"] = [f1.item()]
+    test_metrics["rec"] = [rec.item()]
+    test_metrics["prec"] = [prec.item()]
+    test_metrics["auc"] = [auc.item()]
+    
+    if task_type == "regression":
+        test_metrics["mae"] = [mae.item()]
+        test_metrics["mse"] = [mse.item()]
+        test_metrics["ccc"] = [ccc.item()]
+        test_metrics["krcc"] = [krcc.item()]
+        test_metrics["pcc"] = [pcc.item()]
+        test_metrics["r2s"] = [r2s.item()]
+        test_metrics["rse"] = [rse.item()]
+        test_metrics["scc"] = [scc.item()]
 
-    # Compute overall accuracy
-    test_acc = accuracy_score(y_true=test_y, y_pred=test_y_pred)
-    test_metrics["test_acc"] = [test_acc]
+    if task_type == "regression":
+        return test_metrics, test_y_c.numpy(), test_y_pred_c.numpy()
+    else:
+        return test_metrics, None, None
 
 
-    # Compute class accuracies
-    acc_dict, _, _ = compute_class_acc(data=data, n_classes=n_classes)
-    for c in range(n_classes):
-        test_metrics[f"test_class_{c}_acc"] = [acc_dict[c]]
+
+# Function: Inference Model Pipeline
+def inference_pipeline(test_set, config_json, device, checkpoint_dir, fold):
+
+    # Load the parameters from the configuration JSON
+    n_classes = config_json["data"]["n_classes"]
+    dropout = config_json["hyperparameters"]["dropout"]
+    dropout_prob = config_json["hyperparameters"]["dropout_prob"]
+    model_size = config_json["hyperparameters"]["model_size"]
+    model_type = config_json["hyperparameters"]["model_type"]
+    verbose = config_json["verbose"]
+    num_workers = config_json["data"]["num_workers"]
+    pin_memory = config_json["data"]["pin_memory"]
+    encoding_size = config_json['data']['encoding_size']
+    features_ = config_json["features"]
+    task_type = config_json["task_type"]
 
 
-    return test_metrics
+    # Dictionary with model settings for the initialization of the model object
+    if task_type in ("classification", "clinical_subtype_classification"):
+        model_dict = {
+            "dropout":dropout,
+            "dropout_prob":dropout_prob,
+            'n_classes':n_classes,
+            "encoding_size":encoding_size
+        }
+    elif task_type == "regression":
+        model_dict = {
+            "dropout":dropout,
+            "dropout_prob":dropout_prob,
+            "encoding_size":encoding_size
+        }
+    
+
+    # Adapted from the CLAM framework
+    assert model_size is not None, "Please define a model size."
+    
+    model_dict.update({"size_arg": model_size})
+    
+    # AM-SB
+    if task_type in ("classification", "clinical_subtype_classification"):
+        if model_type == 'am_sb':
+            model = AM_SB(**model_dict)
+        elif model_type == 'am_mb':
+            model = AM_MB(**model_dict)
+    elif task_type == "regression":
+        if model_type == 'am_sb':
+            model = AM_SB_Regression(**model_dict)
+
+    if verbose:
+        print(f"Using features: {features_}")
+        summary(model)
+
+
+    # Create DataLoaders 
+    # FIXME: The code is currently optimized for batch_size == 1)
+    test_loader = DataLoader(
+        dataset=test_set,
+        batch_size=1,
+        shuffle=False,
+        num_workers=num_workers,
+        pin_memory=pin_memory
+    )
+
+    # Load model checkpoint
+    model.load_state_dict(torch.load(os.path.join(checkpoint_dir, f"best_model_kf{fold}.pt"), map_location=device))
+    model.to(device)
+
+    # Put model into evaluation 
+    model.eval()
+
+    # Initialize variables to track values
+    test_y_pred = list()
+    test_y_pred_proba = list()
+    test_y = list()
+
+    # Initialize variables 
+    test_case_ids = list()
+    test_svs_paths = list()
+    test_y_pred = list()
+    test_y_pred_proba = list()
+    test_y_pred_c = list()
+    test_y = list()
+    test_y_c = list()
+
+    # Get batch of data
+    for _, input_data_dict in enumerate(test_loader):
+
+        if task_type == "classification":
+            case_id, svs_path, features, ssgsea_scores = input_data_dict["case_id"], input_data_dict["svs_path"], input_data_dict['features'].to(device), input_data_dict['ssgsea_scores'].to(device)
+            output_dict = model(features)
+            logits, y_pred, y_proba = output_dict['logits'], output_dict['y_pred'], output_dict["y_proba"]
+            test_y_pred_c.extend(list(logits.cpu().detach().numpy()))
+            test_y_pred.extend(list(y_pred.cpu().detach().numpy()))
+            test_y.extend(list(ssgsea_scores.cpu().detach().numpy()))
+            test_y_pred_proba.extend(list(y_proba.detach().numpy()))
+            test_case_ids.extend(case_id)
+            test_svs_paths.extend(svs_path)
+        
+        elif task_type == "clinical_subtype_classification":
+            case_id, svs_path, features, c_subtypes = input_data_dict["case_id"], input_data_dict["svs_path"], input_data_dict['features'].to(device), input_data_dict['c_subtype_label'].to(device)
+            output_dict = model(features)
+            logits, y_pred, y_proba = output_dict['logits'], output_dict['y_pred'], output_dict['y_proba']
+            test_y_pred.extend(list(y_pred.cpu().detach().numpy()))
+            test_y.extend(list(c_subtypes.cpu().detach().numpy()))
+            test_y_pred_proba.extend(list(y_proba.cpu().detach().numpy()))
+            test_case_ids.extend(case_id)
+            test_svs_paths.extend(svs_path)
+
+        elif task_type == "regression":
+            case_id, svs_path, features, ssgsea_scores, ssgsea_scores_bin = input_data_dict["case_id"], input_data_dict["svs_path"], input_data_dict["features"].to(device), input_data_dict["ssgsea_scores"].to(device), input_data_dict["ssgsea_scores_bin"].to(device)
+            output_dict = model(features)
+            logits = output_dict['logits']
+            y_pred = torch.where(logits > 0, 1.0, 0.0)
+            y_pred_proba = F.sigmoid(logits)
+            test_y_pred_c.extend(list(logits.squeeze(0).cpu().detach().numpy()))
+            test_y_pred.extend(list(y_pred.squeeze(0).cpu().detach().numpy()))
+            test_y.extend(list(ssgsea_scores_bin.cpu().detach().numpy()))
+            test_y_c.extend(list(ssgsea_scores.cpu().detach().numpy()))
+            test_y_pred_proba.extend(list(y_pred_proba.squeeze(0).cpu().detach().numpy()))
+            test_case_ids.extend(case_id)
+            test_svs_paths.extend(svs_path)
+
+
+
+        # Create a test inference dictionary
+        test_inference_dict = {
+            "case_id":test_case_ids,
+            "svs_path":test_svs_paths,
+            "test_y":test_y,
+            "test_y_c":test_y_c,
+            "test_y_pred":test_y_pred,
+            "test_y_pred_c":test_y_pred_c,
+            "test_y_pred_proba":test_y_pred_proba
+        }
+
+
+    return test_inference_dict
 
 
 
 # Function: Train Loop for CLAM
-def train_loop_clam(epoch, model, loader, optimizer, n_classes, loss_fn, device, wandb_run):
+def train_loop_clam(epoch, model, loader, optimizer, n_classes, task_type, loss_fn, device, wandb_run):
 
     # Put model into training mode
     model.train()
 
-    # Data dictionary to log step accuracies
-    data = [{"count": 0, "correct": 0} for _ in range(n_classes)]
-
     # Initialize variables 
     train_loss = 0.
-    train_error = 0.
     train_y_pred = list()
+    train_y_pred_proba = list()
     train_y = list()
-
-
 
     # Get batch of data
     for _, input_data_dict in enumerate(loader):
-        features, ssgea_scores = input_data_dict['features'].to(device), input_data_dict['ssgsea_scores'].to(device)
-        output_dict = model(features)
-        logits, y_pred = output_dict['logits'], output_dict['y_pred']
 
-        # Append predictions and labels into the corresponding lists
-        train_y_pred.extend(list(y_pred.cpu().detach().numpy()))
-        train_y.extend(list(ssgea_scores.cpu().detach().numpy()))
+        if task_type == "classification":
+            features, ssgsea_scores = input_data_dict['features'].to(device), input_data_dict['ssgsea_scores'].to(device)
+            output_dict = model(features)
+            logits, y_pred, y_proba = output_dict['logits'], output_dict['y_pred'], output_dict['y_proba']
+            train_y_pred.extend(list(y_pred.cpu().detach().numpy()))
+            train_y.extend(list(ssgsea_scores.cpu().detach().numpy()))
+            train_y_pred_proba.extend(list(y_proba.cpu().detach().numpy()))
+            loss = loss_fn(logits, ssgsea_scores)
+        
+        elif task_type == "clinical_subtype_classification":
+            features, c_subtypes = input_data_dict['features'].to(device), input_data_dict['c_subtype_label'].to(device)
+            output_dict = model(features)
+            logits, y_pred, y_proba = output_dict['logits'], output_dict['y_pred'], output_dict['y_proba']
+            train_y_pred.extend(list(y_pred.cpu().detach().numpy()))
+            train_y.extend(list(c_subtypes.cpu().detach().numpy()))
+            train_y_pred_proba.extend(list(y_proba.cpu().detach().numpy()))
+            loss = loss_fn(logits, c_subtypes)
 
-        # Log step counts and correct counts
-        data[int(ssgea_scores)]["count"] += 1
-        data[int(ssgea_scores)]["correct"] += (int(y_pred) == int(ssgea_scores))
-
-        # Compute train loss
-        loss = loss_fn(logits, ssgea_scores)
-
+        elif task_type == "regression":
+            features, ssgsea_scores, ssgsea_scores_bin = input_data_dict["features"].to(device), input_data_dict["ssgsea_scores"].to(device), input_data_dict["ssgsea_scores_bin"].to(device)
+            output_dict = model(features)
+            logits = output_dict['logits']
+            y_pred = torch.where(logits > 0, 1.0, 0.0)
+            y_pred_proba = F.sigmoid(logits)
+            train_y_pred.extend(list(y_pred.squeeze(0).cpu().detach().numpy()))
+            train_y.extend(list(ssgsea_scores_bin.cpu().detach().numpy()))
+            train_y_pred_proba.extend(list(y_pred_proba.squeeze(0).cpu().detach().numpy()))
+            loss = loss_fn(logits.squeeze(0), ssgsea_scores.float())
+        
         # Get loss values and update records
         loss_value = loss.item()
         train_loss += loss_value
 
         # Log batch metrics to WandB
         wandb_run.log({"train_batch_loss":loss_value})
-
-        # Compute error
-        train_error += compute_prediction_error(y_pred=y_pred, y=ssgea_scores)
         
         # Backpropagation 
         loss.backward()
@@ -430,146 +704,237 @@ def train_loop_clam(epoch, model, loader, optimizer, n_classes, loss_fn, device,
 
     # Calculate loss and error for epoch
     train_loss /= len(loader)
-    train_error /= len(loader)
 
 
-    # Log batch metrics to WandB
-    wandb_run.log(
-        {
-            'epoch':epoch,
-            'train_error':train_error
-        }
-    )
-    
-    
-    # Compute class accuracies
-    acc_dict, correct_dict, count_dict = compute_class_acc(data=data, n_classes=n_classes)
-    for c in range(n_classes):
-        wandb_run.log(
-            {
-                f"train_class_{c}_acc":acc_dict[c],
-                f"train_class_{c}_correct":correct_dict[c],
-                f"train_class_{c}_count":count_dict[c]
-            }
+    # Compute metrics
+    train_y_pred = torch.from_numpy(np.array(train_y_pred))
+    train_y = torch.from_numpy(np.array(train_y))
+    train_y_pred_proba = torch.from_numpy(np.array(train_y_pred_proba))
+
+    if n_classes == 2:
+        acc = accuracy(
+            preds=train_y_pred,
+            target=train_y,
+            task='binary'
         )
 
+        f1 = f1_score(
+            preds=train_y_pred,
+            target=train_y,
+            task='binary'
+        )
 
-    # Compute overall accuracy
-    train_acc = accuracy_score(y_true=train_y, y_pred=train_y_pred)
+        rec = recall(
+            preds=train_y_pred,
+            target=train_y,
+            task='binary'
+        )
+
+        prec = precision(
+            preds=train_y_pred,
+            target=train_y,
+            task='binary'
+        )
+
+        auc = auroc(
+            preds=train_y_pred_proba,
+            target=train_y,
+            task='binary'
+        )
+
+    else:
+        acc = accuracy(
+            preds=train_y_pred,
+            target=train_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
+
+        f1 = f1_score(
+            preds=train_y_pred,
+            target=train_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
+
+        rec = recall(
+            preds=train_y_pred,
+            target=train_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
+
+        prec = precision(
+            preds=train_y_pred,
+            target=train_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
+
+        auc = auroc(
+            preds=train_y_pred_proba,
+            target=train_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
+
+    
+    # Log metrics into W&B
     wandb_run.log(
         {
-            "train_acc":train_acc
+            "train_epoch":epoch,
+            "train_loss":train_loss,
+            "train_acc":acc,
+            "train_f1":f1,
+            "train_rec":rec,
+            "train_prec":prec,
+            "train_auc":auc
         }
     )
-    
+
     return
 
 
 
 # Function: Validation Loop for CLAM
-def validate_loop_clam(model, loader, n_classes, tracking_params, loss_fn, experiment_dir, checkpoint_fname, device, wandb_run):
+def validate_loop_clam(model, loader, n_classes, task_type, tracking_params, loss_fn, experiment_dir, checkpoint_fname, device, wandb_run):
 
     # Put model into evaluation 
     model.eval()
-
-    # Data dictionary to log step accuracies
-    data = [{"count": 0, "correct": 0} for _ in range(n_classes)]
     
     # Initialize variables to track values
     val_loss = 0.
-    val_error = 0.
     val_y_pred = list()
-    val_y_pred_prob = list()
+    val_y_pred_proba = list()
     val_y = list()
 
 
     # Go through data batches and get metric values
     with torch.no_grad():
         for _, input_data_dict in enumerate(loader):
-            features, ssgea_scores = input_data_dict['features'].to(device), input_data_dict['ssgsea_scores'].to(device)
-            output_dict = model(features)
-            logits, y_pred_prob, y_pred = output_dict['logits'], output_dict['y_proba'], output_dict['y_pred'], 
-            
-            # Log step counts and correct counts
-            data[int(ssgea_scores)]["count"] += 1
-            data[int(ssgea_scores)]["correct"] += (int(y_pred) == int(ssgea_scores))
+            if task_type == "classification":
+                features, ssgsea_scores = input_data_dict['features'].to(device), input_data_dict['ssgsea_scores'].to(device)
+                output_dict = model(features)
+                logits, y_pred, y_proba = output_dict['logits'], output_dict['y_pred'], output_dict['y_proba']
+                val_y_pred.extend(list(y_pred.cpu().detach().numpy()))
+                val_y.extend(list(ssgsea_scores.cpu().detach().numpy()))
+                val_y_pred_proba.extend(list(y_proba.cpu().detach().numpy()))
+                loss = loss_fn(logits, ssgsea_scores)
 
-            # Append predictions and labels into the corresponding lists
-            val_y_pred.extend(list(y_pred.cpu().detach().numpy()))
-            val_y.extend(list(ssgea_scores.cpu().detach().numpy()))
+            elif task_type == "clinical_subtype_classification":
+                features, c_subtypes = input_data_dict['features'].to(device), input_data_dict['c_subtype_label'].to(device)
+                output_dict = model(features)
+                logits, y_pred, y_proba = output_dict['logits'], output_dict['y_pred'], output_dict['y_proba']
+                val_y_pred.extend(list(y_pred.cpu().detach().numpy()))
+                val_y.extend(list(c_subtypes.cpu().detach().numpy()))
+                val_y_pred_proba.extend(list(y_proba.cpu().detach().numpy()))
+                loss = loss_fn(logits, c_subtypes)
 
-            # Compute validation loss
-            loss = loss_fn(logits, ssgea_scores)
+            elif task_type == "regression":
+                features, ssgsea_scores, ssgsea_scores_bin = input_data_dict["features"].to(device), input_data_dict["ssgsea_scores"].to(device), input_data_dict["ssgsea_scores_bin"].to(device)
+                output_dict = model(features)
+                logits = output_dict['logits']
+                y_pred = torch.where(logits > 0, 1.0, 0.0)
+                y_pred_proba = F.sigmoid(logits)
+                val_y_pred.extend(list(y_pred.squeeze(0).cpu().detach().numpy()))
+                val_y.extend(list(ssgsea_scores_bin.cpu().detach().numpy()))
+                val_y_pred_proba.extend(list(y_pred_proba.squeeze(0).cpu().detach().numpy()))
+                loss = loss_fn(logits.squeeze(0), ssgsea_scores.float())
+
             loss_value = loss.item()
             val_loss += loss_value
-
-            # Updated list of y_pred probabilities
-            val_y_pred_prob.append(y_pred_prob.cpu().numpy())
-            
 
             # Log batch metrics to WandB
             wandb_run.log({"val_batch_loss":loss_value})
 
-            # Compute error and update it
-            error = compute_prediction_error(y_pred=y_pred, y=ssgea_scores)
-            val_error += error
 
-
-    # Updated final validation error and loss
-    val_error /= len(loader)
+    # Updated final validation loss
     val_loss /= len(loader)
 
+    # Compute metrics
+    val_y_pred = torch.from_numpy(np.array(val_y_pred))
+    val_y = torch.from_numpy(np.array(val_y))
+    val_y_pred_proba = torch.from_numpy(np.array(val_y_pred_proba))
 
-    # Compute Validation ROC AUC
     if n_classes == 2:
-
-        # Convert lists to NumPy arrays and fix their shape(s)
-        val_y = np.array(val_y)
-        val_y_pred_prob = np.squeeze(np.array(val_y_pred_prob), axis=1)
-
-        # Compute the ROC AUC Score
-        val_auc = roc_auc_score(val_y, val_y_pred_prob[:, 1])
-        val_aucs = []
-    
-    else:
-        val_aucs = []
-        binary_labels = label_binarize(val_y, classes=[i for i in range(n_classes)])
-        for class_idx in range(n_classes):
-            if class_idx in val_y:
-                fpr, tpr, _ = roc_curve(binary_labels[:, class_idx], val_y_pred_prob[:, class_idx])
-                val_aucs.append(auc(fpr, tpr))
-            else:
-                val_aucs.append(float('nan'))
-
-        val_auc = np.nanmean(np.array(val_aucs))
-
-
-    # Log batch metrics to WandB
-    wandb_run.log(
-        {
-            'val_loss':val_loss,
-            'val_error':val_error,
-            'val_auc':val_auc,
-        }
-    )
-
-
-
-    # Compute class accuracies
-    acc_dict, correct_dict, count_dict = compute_class_acc(data=data, n_classes=n_classes)
-    for c in range(n_classes):
-        wandb_run.log(
-            {
-                f"val_class_{c}_acc":acc_dict[c],
-                f"val_class_{c}_correct":correct_dict[c],
-                f"val_class_{c}_count":count_dict[c]
-            }
+        acc = accuracy(
+            preds=val_y_pred,
+            target=val_y,
+            task='binary'
         )
 
+        f1 = f1_score(
+            preds=val_y_pred,
+            target=val_y,
+            task='binary'
+        )
 
-    # Compute overall accuracy
-    val_acc = accuracy_score(y_true=val_y, y_pred=val_y_pred)
-    wandb_run.log({"val_acc":val_acc})
+        rec = recall(
+            preds=val_y_pred,
+            target=val_y,
+            task='binary'
+        )
+
+        prec = precision(
+            preds=val_y_pred,
+            target=val_y,
+            task='binary'
+        )
+
+        auc = auroc(
+            preds=val_y_pred_proba,
+            target=val_y,
+            task='binary'
+        )
+
+    else:
+        acc = accuracy(
+            preds=val_y_pred,
+            target=val_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
+
+        f1 = f1_score(
+            preds=val_y_pred,
+            target=val_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
+
+        rec = recall(
+            preds=val_y_pred,
+            target=val_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
+
+        prec = precision(
+            preds=val_y_pred,
+            target=val_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
+
+        auc = auroc(
+            preds=val_y_pred_proba,
+            target=val_y,
+            task='multiclass',
+            num_classes=n_classes
+        )
+
+    
+    # Log metrics into W&B
+    wandb_run.log(
+        {
+            "val_loss":val_loss,
+            "val_acc":acc,
+            "val_f1":f1,
+            "val_rec":rec,
+            "val_prec":prec,
+            "val_auc":auc
+        }
+    )
 
 
     # Save checkpoints based on tracking_params parameters

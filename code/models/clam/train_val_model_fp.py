@@ -14,7 +14,7 @@ import torch
 
 # Project Imports
 from train_val_test_utilities import train_val_pipeline
-from data_utilities import TCGABRCA_MIL_Dataset
+from data_utilities import TCGABRCA_MIL_Dataset, TCGABRCA_MIL_DatasetRegression, TCGABRCA_MIL_DatasetClinicalSubtype
 
 
 
@@ -68,7 +68,7 @@ if __name__ == "__main__":
             'kegg_cell_cycle', 
             'immunosuppression'
         ],
-        required=True,
+        required=False,
         help='The SSEGA pathways for the TCGA-BRCA dataset.'
     )
     parser.add_argument("--config_json", type=str, required=True, help="The path to the configuration JSON.")
@@ -91,6 +91,9 @@ if __name__ == "__main__":
 
     # Get timestamp and experiment directory
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    if args.label is None:
+        if config_json["task_type"] == "clinical_subtype_classification":
+            args.label = "c_subtype"
     experiment_dir = os.path.join(args.results_dir, args.label, timestamp)
     if not os.path.isdir(experiment_dir):
         os.makedirs(experiment_dir)
@@ -114,18 +117,39 @@ if __name__ == "__main__":
     # Features source
     features_ = config_json["features"]
 
+    # Task type
+    task_type = config_json["task_type"]
+
 
     # Load data
     print('Loading dataset...')
     if args.dataset == 'TCGA-BRCA':
-        dataset = TCGABRCA_MIL_Dataset(
-            base_data_path=args.base_data_path,
-            experimental_strategy=args.experimental_strategy,
-            label=args.label,
-            features_h5_dir=args.features_h5_dir,
-            n_folds=int(config_json["data"]["n_folds"]),
-            seed=int(args.seed)
-        )
+        if task_type == "classification":
+            dataset = TCGABRCA_MIL_Dataset(
+                base_data_path=args.base_data_path,
+                experimental_strategy=args.experimental_strategy,
+                label=args.label,
+                features_h5_dir=args.features_h5_dir,
+                n_folds=int(config_json["data"]["n_folds"]),
+                seed=int(args.seed)
+            )
+        elif task_type == "clinical_subtype_classification":
+            dataset = TCGABRCA_MIL_DatasetClinicalSubtype(
+                base_data_path=args.base_data_path,
+                experimental_strategy=args.experimental_strategy,
+                features_h5_dir=args.features_h5_dir,
+                n_folds=int(config_json["data"]["n_folds"]),
+                seed=int(args.seed)
+            )
+        elif task_type == "regression":
+            dataset = TCGABRCA_MIL_DatasetRegression(
+                base_data_path=args.base_data_path,
+                    experimental_strategy=args.experimental_strategy,
+                    label=args.label,
+                    features_h5_dir=args.features_h5_dir,
+                    n_folds=int(config_json["data"]["n_folds"]),
+                    seed=int(args.seed)
+            )
 
         # Create the data splits from the original dataset
         train_set = copy.deepcopy(dataset)

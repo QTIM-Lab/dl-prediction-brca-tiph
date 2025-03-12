@@ -1,0 +1,27 @@
+{
+    "data": {
+        "label_frac": 1.0,
+        "encoding_size": 512,
+        "n_folds": 1,
+        "n_classes":4,
+        "num_workers":4,
+        "pin_memory":true
+    },
+
+    "hyperparameters": {
+        "epochs": 300,
+        "lr": 2e-4,
+        "weight_decay": 1e-5,
+        "early_stopping": false,
+        "optimizer": "Adam",
+        "dropout": true,
+        "dropout_prob": 0.25,
+        "model_type": "am_sb",
+        "weighted_sample": false,
+        "model_size": "small"
+    },
+
+    "verbose": true,
+    "features": "conch",
+    "task_type":"clinical_subtype_classification"
+  }
